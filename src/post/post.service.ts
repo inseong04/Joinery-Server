@@ -23,13 +23,11 @@ export class PostService {
     else {
         const startDate = new Date(findRegionDto.startDate);
         const endDate = new Date(findRegionDto.endDate);
-        return await this.PostModel.find({region_id:regionId, startDate:{$lte: startDate}, endDate:{$gte:endDate} });
-
+        return await this.PostModel.find({region_id:regionId, startDate:{$gte: startDate}, endDate:{$lte:endDate} });
     }
     }
 
     async getIsHeart(isHeartDto: isHeartDto){
-        console.log("zxcvasdf");
         const post = await this.PostModel.findById(isHeartDto.postId);
         if (post == null){
             console.log("error");

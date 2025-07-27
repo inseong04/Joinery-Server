@@ -16,6 +16,13 @@ export class PostController {
     constructor(private readonly postService: PostService){}
 
 
+    // issue: 이 부분이 아예 작동안하는듯
+    @ApiOperation({summary:'유저가 게시글에 하트를 눌렀는지의 여부확인'})
+    @Get('/is-heart')
+    async getIsHeart(@Body() isHeartDto: isHeartDto){
+        console.log("start");
+        return this.postService.getIsHeart(isHeartDto);
+    }
     @ApiOperation({summary:'특정 id의 게시글 반환'})
     @ApiParam({name:'id',type:'string'})
     @ApiOkResponse({description:'성공적으로 게시글이 조회됨',})
@@ -27,12 +34,7 @@ export class PostController {
         return this.postService.getPost(id);
     }
 
-    @ApiOperation({summary:'유저가 게시글에 하트를 눌렀는지의 여부확인'})
-    @Get('/is-heart')
-    async getIsHeart(@Query() isHeartDto: isHeartDto){
-        console.log("start");
-        return this.postService.getIsHeart(isHeartDto);
-    }
+
     @ApiOperation({summary:'인기 여행지 목록', description:'인기 여행지 5개를 반환. 게시글이 많이 작성된 것을 기준으로 반환합니다.'})
     @ApiOkResponse({description:'요청 성공', schema:{properties:{count: {type:'number',example:'9'}, regionId: {type:'number',example:'3'}}}})
     @Get('/region/popular')
