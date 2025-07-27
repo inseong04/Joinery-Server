@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Res, UseGuards, } from '@nestjs/common';
 import { SignUpDto } from './dto/signup.dto';
 import { Verification } from './schema/verification.schema';
 import { AuthService } from './auth.service';
-import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiHeader, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SignInDto } from './dto/signin.dto';
 import { Response } from 'express';
 import { JwtAuthGuard } from './guard/auth.guard';
@@ -11,17 +11,16 @@ import { JwtAuthGuard } from './guard/auth.guard';
 @Controller('auth')
 export class AuthController {
     constructor(private readonly authService: AuthService) {}
-    
+
     @ApiOperation({summary:'로그인'})
     @ApiBody({type:SignInDto})
-@ApiCreatedResponse({
-    description: '로그인 성공 시 JWT 토큰 반환',
-    schema: {
-        example: {
-            accessToken: 'TOKEN KEY'
-        }
-    }
-})
+    @ApiCreatedResponse({
+        description: '로그인 성공 시 JWT 토큰 반환',
+        schema: {
+            example: {
+                accessToken: 'TOKEN KEY'
+            }
+        }})
     @Post('/sign-in')
     async signIn(@Body() signInDto: SignInDto, @Res() res: Response): Promise<any> {
         const jwt = await this.authService.validateUser(signInDto);
@@ -37,7 +36,7 @@ export class AuthController {
         return this.authService.create(signUpDto);
     }
 
-    @ApiCreatedResponse({
+    @ApiOkResponse({
     description: 'JWT 인증 성공',
     schema: {
         example: {

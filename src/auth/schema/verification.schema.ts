@@ -22,7 +22,7 @@ export class Verification {
     
         @ApiProperty({description:'생년월일'})
         @Prop()
-        birthDate:string;
+        birthDate:Date;
 
         @ApiProperty({description:'여행 스타일. string[]'})
         @Prop({type:[String]})
@@ -31,5 +31,9 @@ export class Verification {
         @ApiProperty({description:'자기 소개'})
         @Prop()
         userDescription:string;
+
+        @ApiProperty({description:'작성한 게시글 목록'})
+        @Prop({type:[String]})
+        wrotePost:string[];
 }
 export const VerificationSchema = SchemaFactory.createForClass(Verification);

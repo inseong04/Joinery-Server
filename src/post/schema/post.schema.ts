@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { ApiProperty } from "@nestjs/swagger";
-import { Schedule } from "../dto/schedule.model";
+import { Schedule } from "../model/schedule.model";
 
 @Schema({timestamps:true})
 export class PostSchema {
@@ -30,11 +30,11 @@ export class PostSchema {
 
     @ApiProperty({description: '시작하는 스케줄 날짜. 2025-01-21 와 같이 format'})
     @Prop()
-    startDate:string;
+    startDate:Date;
 
     @ApiProperty({description: '마지막 스케줄 날짜. 2025-01-21 와 같이 format'})
     @Prop()
-    endDate:string;
+    endDate:Date;
 
     @ApiProperty({description: '하트(찜) 한계 수 - 모집인원이라고 볼수있음.'})
     @Prop()

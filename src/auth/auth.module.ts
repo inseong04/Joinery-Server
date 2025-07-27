@@ -9,7 +9,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    ConfigModule, // ConfigModule import
+    ConfigModule,
     MongooseModule.forFeature([
       { name: 'User', schema: VerificationSchema}
     ]),

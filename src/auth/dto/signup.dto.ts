@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsArray, IsDate, IsEnum, IsString } from "class-validator";
+import { IsArray, IsDate, IsEnum, IsOptional, IsString } from "class-validator";
 import { Gender } from "src/constants/user.constants";
 
 export class SignUpDto {
@@ -31,4 +31,8 @@ export class SignUpDto {
             @ApiProperty({description:'자기 소개'})
             @IsString()
             userDescription:string;
+
+            @ApiProperty({description:'작성한 게시글 목록'})
+            @IsOptional()
+            wrotePost:string[];
 }
