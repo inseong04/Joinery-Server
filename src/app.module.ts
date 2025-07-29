@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import * as mongoose from 'mongoose';
 import { JwtModule } from '@nestjs/jwt';
 import { PostModule } from './post/post.module';
+import { UserModule } from './user/user.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -15,7 +16,8 @@ import { PostModule } from './post/post.module';
     }),
     MongooseModule.forRoot(process.env.MONGODB_URI || ''),
     AuthModule,
-    PostModule
+    PostModule,
+    UserModule
   ],
   controllers: [AppController],
   providers: [AppService],

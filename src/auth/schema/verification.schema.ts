@@ -35,5 +35,9 @@ export class Verification {
         @ApiProperty({description:'작성한 게시글 목록'})
         @Prop({type:[String]})
         wrotePost:string[];
+
+        @ApiProperty({description:'하트 누른 게시글 목록'})
+        @Prop({type:[String]})
+        likePostId:string[];
 }
 export const VerificationSchema = SchemaFactory.createForClass(Verification);

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PostCreateDto } from './dto/post.create.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -7,6 +7,7 @@ import { DetailPost } from './model/detail.post.model';
 import { FindRegionDto } from './dto/find.region.dto';
 import { Verification } from 'src/auth/schema/verification.schema';
 import { isHeartDto } from './dto/isHeart.dto';
+import { HeartType } from 'src/constants/user.constants';
 
 @Injectable()
 export class PostService {
@@ -27,16 +28,6 @@ export class PostService {
     }
     }
 
-    async getIsHeart(isHeartDto: isHeartDto){
-        const post = await this.PostModel.findById(isHeartDto.postId);
-        if (post == null){
-            console.log("error");
-            return {message:"failed"};
-        }
-        const likedUserIdList :string[] = post.likedUserId;
-        return {isHeart:likedUserIdList.includes(isHeartDto.userId)};
-    }
-
     private formatDateHour(date: Date | string): string {
       if (!(date instanceof Date)) date = new Date(date);
       const yyyy = date.getFullYear();
@@ -46,17 +37,43 @@ export class PostService {
       return `${yyyy}-${mm}-${dd} ${hh}`;
     }
 
-    async getPost(id : string): Promise<DetailPost | null>{
+    async getPost(id : string, userId:string): Promise<DetailPost | null>{
         const post = await this.PostModel.findById(id).lean();
-        if (!post) return null;
+        const user = await this.verificationModel.findById(userId).select('')
+
+        if (!post) throw new NotFoundException();
+        if (!user) throw new NotFoundException();
+        // 아무도 하트X-> 아무데도 등록X
+        // 유저만 하트 -> likePostId에 postId등록, likedUserId에 userId 등록, memberId에는 등록X
+        // 둘다 하트  -> likePostId에는 이미 등록, likedUserId에는 userId 삭제, memberId에는 등록O 
+        let heartType : HeartType = HeartType.NoOne;
+        if (user.likePostId.includes(id)){
+            if (post.memberId.includes(userId)){
+                heartType = HeartType.Both;
+            } else {
+                heartType = HeartType.UserOnly;
+            }
+        } 
         // startDate, endDate를 'YYYY-MM-DD HH' string로 변환
         return {
             ...post,
             startDate: this.formatDateHour(post.startDate),
             endDate: this.formatDateHour(post.endDate),
+            heartType: heartType,
         } as DetailPost;
     }
-    //TODO::여기 작업.
+
+    async updateLike(id: string, userId: string, isDelete:boolean){
+        if (isDelete){
+            await this.PostModel.findByIdAndUpdate(id, {$pull: { likedUserId: userId}})
+            await this.verificationModel.findByIdAndUpdate(userId, {$pull: {likePostId: id}})
+        } else {
+            await this.PostModel.findByIdAndUpdate(id, {$addToSet: {likedUserId: userId}},{new: true});
+            await this.verificationModel.findByIdAndUpdate(userId, {$addToSet: {likePostId: id}}, {new:true})
+        }
+        return {message:"success"}
+    }
+
     async getPopularRegions(){
         const oneWeekAgo = new Date();
         oneWeekAgo.setDate(oneWeekAgo.getDate() -7);

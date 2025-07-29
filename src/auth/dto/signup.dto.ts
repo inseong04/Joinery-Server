@@ -35,4 +35,8 @@ export class SignUpDto {
             @ApiProperty({description:'작성한 게시글 목록'})
             @IsOptional()
             wrotePost:string[];
+
+            @ApiProperty({description:'하트 누른 게시글 목록'})
+            @IsOptional()
+            likePostId:string[];
 }

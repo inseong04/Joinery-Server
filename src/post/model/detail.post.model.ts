@@ -1,3 +1,4 @@
+import { HeartType } from "src/constants/user.constants";
 import { Schedule } from "./schedule.model";
 
 export class DetailPost{
@@ -13,4 +14,5 @@ export class DetailPost{
     heart:number;
     likedUserId:string[];
     tripStyle:string[];
+    heartType:HeartType;
 }
