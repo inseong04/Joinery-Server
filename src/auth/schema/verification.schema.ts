@@ -39,5 +39,9 @@ export class Verification {
         @ApiProperty({description:'하트 누른 게시글 목록'})
         @Prop({type:[String]})
         likePostId:string[];
+
+        @ApiProperty({description:'관심지역 목록'})
+        @Prop({type:[Region]})
+        interestRegion:Region[];
 }
 export const VerificationSchema = SchemaFactory.createForClass(Verification);

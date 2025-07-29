@@ -32,8 +32,9 @@ export class AuthService {
             signUpDto.birthDate = new Date(signUpDto.birthDate) as any;
         }
         signUpDto.password = await bcrypt.hash(signUpDto.password, 10);
-        signUpDto.wrotePost = [];
+        signUpDto.wrotePost= [];
         signUpDto.likePostId= [];
+        signUpDto.interestRegion= [];
         const createUser = new this.verificationModel(signUpDto);
         return createUser.save();
     }

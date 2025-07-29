@@ -14,4 +14,12 @@ export class UserService {
         if (!user) return null;
         return user;
     }
+
+    async updateInterestRegion(id: string, interestRegionList: Region[]){
+        return await this.verificationModel.findByIdAndUpdate(id, {$addToSet:{ interestRegion: { $each: interestRegionList}}});
+    }
+
+    async deleteInterestRegion(id: string, deleteInterestRegion: Region){
+        return await this.verificationModel.updateOne({_id:id}, {$pull:{interestRegion: deleteInterestRegion}});   
+    }
 }

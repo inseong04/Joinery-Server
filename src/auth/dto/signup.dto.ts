@@ -39,4 +39,8 @@ export class SignUpDto {
             @ApiProperty({description:'하트 누른 게시글 목록'})
             @IsOptional()
             likePostId:string[];
+
+            @ApiProperty({description:'관심지역 목록'})
+            @IsOptional()
+            interestRegion:Region[];
 }

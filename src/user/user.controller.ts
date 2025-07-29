@@ -1,7 +1,8 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Patch, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
-import { ApiOperation, ApiParam } from '@nestjs/swagger';
-import { ObjectId } from 'mongoose';
+import { ApiBearerAuth, ApiOperation, ApiParam } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/guard/auth.guard';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 
 @Controller('user')
 export class UserController {
@@ -12,5 +13,21 @@ export class UserController {
     @Get('/:id')
     async getUser(@Param() id:string){
         return this.userService.getUser(id);
+    }
+
+    @ApiOperation({summary:'관심지역 수정'})
+    @ApiBearerAuth('token')
+    @UseGuards(JwtAuthGuard)
+    @Patch('/interest-region')
+    async updateInterestRegion(@CurrentUser() id: string, interestRegionList:Region[]){
+        return this.userService.updateInterestRegion(id, interestRegionList);
+    }
+
+    @ApiOperation({summary:'관심지역 삭제'})
+    @ApiBearerAuth('token')
+    @UseGuards(JwtAuthGuard)
+    @Delete('/interest-region')
+    async deleteInterestRegion(@CurrentUser() id:string, deleteInterestRegion:Region){
+        return this.userService.deleteInterestRegion(id, deleteInterestRegion);
     }
 }
