@@ -63,14 +63,15 @@ export class PostService {
         } as DetailPost;
     }
 
-    async updateLike(id: string, userId: string, isDelete:boolean){
-        if (isDelete){
-            await this.PostModel.findByIdAndUpdate(id, {$pull: { likedUserId: userId}})
-            await this.verificationModel.findByIdAndUpdate(userId, {$pull: {likePostId: id}})
-        } else {
-            await this.PostModel.findByIdAndUpdate(id, {$addToSet: {likedUserId: userId}},{new: true});
-            await this.verificationModel.findByIdAndUpdate(userId, {$addToSet: {likePostId: id}}, {new:true})
-        }
+    async updateLike(id: string, userId: string){
+        await this.PostModel.findByIdAndUpdate(id, {$addToSet: {likedUserId: userId}},{new: true});
+        await this.verificationModel.findByIdAndUpdate(userId, {$addToSet: {likePostId: id}}, {new:true})
+        return {message:"success"}
+    }
+
+    async deleteLike(id: string, userId: string){
+        await this.PostModel.findByIdAndUpdate(id, {$pull: { likedUserId: userId}})
+        await this.verificationModel.findByIdAndUpdate(userId, {$pull: {likePostId: id}})
         return {message:"success"}
     }
 

@@ -28,6 +28,10 @@ export class UserService {
         );
     }
 
+    async getUserWrotePost(id: string){
+        return await this.verificationModel.findById(id).select('wrotePost');
+    }
+
     async updateInterestRegion(id: string, interestRegionList: number[]){
         // 숫자 배열을 Region enum으로 변환
         const regionList = interestRegionList.map(regionId => Region[regionId]);

@@ -60,6 +60,12 @@ export class UserController {
         return this.userService.getUser(id);
     }
 
+    @UseGuards(JwtAuthGuard)
+    @Get('/wrote-post')
+    async getUserWrotePost(@CurrentUser() id: string) {
+        return this.userService.getUserWrotePost(id);
+    }
+
     @ApiOperation({
         summary:'관심지역 수정',
         description: '현재 로그인한 사용자의 관심지역 목록을 수정합니다.'
@@ -78,34 +84,12 @@ export class UserController {
     })
     @ApiOkResponse({
         description: '관심지역 수정 성공',
-        schema: {
-            type: 'object',
-            properties: {
-                id: { type: 'string', example: '507f1f77bcf86cd799439011' },
-                interestRegion: { 
-                    type: 'array', 
-                    items: { type: 'object' },
-                    example: [
-                        { id: 1, name: '서울' },
-                        { id: 2, name: '부산' },
-                        { id: 3, name: '제주' }
-                    ]
-                },
-                updatedAt: { type: 'string', example: '2024-01-01T00:00:00.000Z' }
-            }
-        }
+        schema: UserResponse
     })
     @ApiResponse({
         status: 401,
         description: '인증 실패',
-        schema: {
-            type: 'object',
-            properties: {
-                message: { type: 'string', example: 'Unauthorized' },
-                error: { type: 'string', example: 'Unauthorized' },
-                statusCode: { type: 'number', example: 401 }
-            }
-        }
+        schema: CommonResponses.unauthorized
     })
     @UseGuards(JwtAuthGuard)
     @Patch('/interest-region')
@@ -128,45 +112,17 @@ export class UserController {
     })
     @ApiOkResponse({
         description: '관심지역 삭제 성공',
-        schema: {
-            type: 'object',
-            properties: {
-                id: { type: 'string', example: '507f1f77bcf86cd799439011' },
-                interestRegion: { 
-                    type: 'array', 
-                    items: { type: 'object' },
-                    example: [
-                        { id: 2, name: '부산' },
-                        { id: 3, name: '제주' }
-                    ]
-                },
-                updatedAt: { type: 'string', example: '2024-01-01T00:00:00.000Z' }
-            }
-        }
+        schema: UserResponse
     })
     @ApiResponse({
         status: 401,
         description: '인증 실패',
-        schema: {
-            type: 'object',
-            properties: {
-                message: { type: 'string', example: 'Unauthorized' },
-                error: { type: 'string', example: 'Unauthorized' },
-                statusCode: { type: 'number', example: 401 }
-            }
-        }
+        schema: CommonResponses.unauthorized
     })
     @ApiResponse({
         status: 404,
         description: '삭제할 관심지역을 찾을 수 없음',
-        schema: {
-            type: 'object',
-            properties: {
-                message: { type: 'string', example: 'Interest region not found' },
-                error: { type: 'string', example: 'Not Found' },
-                statusCode: { type: 'number', example: 404 }
-            }
-        }
+        schema: CommonResponses.notFound
     })
     @UseGuards(JwtAuthGuard)
     @Delete('/interest-region')

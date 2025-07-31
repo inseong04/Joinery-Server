@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiParam, ApiTags, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guard/auth.guard';
 import { PostCreateDto } from './dto/post.create.dto';
@@ -91,8 +91,14 @@ export class PostController {
     })
     @UseGuards(JwtAuthGuard)
     @Patch('/like/:id')
-    async updateLike(@Param('id')id:string, @CurrentUser() userId: string, @Body() body: {isDelete: boolean}): Promise<any>{
-        return this.postService.updateLike(id, userId, body.isDelete);
+    async updateLike(@Param('id')id:string, @CurrentUser() userId: string): Promise<any>{
+        return this.postService.updateLike(id, userId);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Delete('/like/:id')
+    async deleteLike(@Param('id') id:string, @CurrentUser() userId: string): Promise<any>{
+        return this.postService.deleteLike(id, userId);
     }
 
     @ApiOperation({
@@ -122,30 +128,7 @@ export class PostController {
         description: '지역 게시글 목록 조회 성공',
         schema: {
             type: 'array',
-            items: {
-                type: 'object',
-                properties: {
-                    id: { type: 'string', example: '507f1f77bcf86cd799439011' },
-                    title: { type: 'string', example: '서울 여행 후기' },
-                    content: { type: 'string', example: '서울에서 즐거운 시간을 보냈습니다...' },
-                    author: { 
-                        type: 'object',
-                        properties: {
-                            id: { type: 'string', example: '507f1f77bcf86cd799439012' },
-                            nickname: { type: 'string', example: '여행러버' }
-                        }
-                    },
-                    schedule: {
-                        type: 'object',
-                        properties: {
-                            startDate: { type: 'string', example: '2024-01-01' },
-                            endDate: { type: 'string', example: '2024-01-03' }
-                        }
-                    },
-                    likeCount: { type: 'number', example: 5 },
-                    createdAt: { type: 'string', example: '2024-01-01T00:00:00.000Z' }
-                }
-            }
+            items: PostDetailResponse
         }
     })
     @Get('/region/:id')
@@ -163,48 +146,17 @@ export class PostController {
     })
     @ApiCreatedResponse({
         description: '게시글 생성 성공',
-        schema: {
-            type: 'object',
-            properties: {
-                id: { type: 'string', example: '507f1f77bcf86cd799439011' },
-                title: { type: 'string', example: '서울 여행 후기' },
-                content: { type: 'string', example: '서울에서 즐거운 시간을 보냈습니다...' },
-                authorId: { type: 'string', example: '507f1f77bcf86cd799439012' },
-                region_id: { type: 'number', example: 1 },
-                schedule: {
-                    type: 'object',
-                    properties: {
-                        startDate: { type: 'string', example: '2024-01-01' },
-                        endDate: { type: 'string', example: '2024-01-03' }
-                    }
-                },
-                createdAt: { type: 'string', example: '2024-01-01T00:00:00.000Z' }
-            }
-        }
+        schema: PostDetailResponse
     })
     @ApiResponse({
         status: 401,
         description: '인증 실패',
-        schema: {
-            type: 'object',
-            properties: {
-                message: { type: 'string', example: 'Unauthorized' },
-                error: { type: 'string', example: 'Unauthorized' },
-                statusCode: { type: 'number', example: 401 }
-            }
-        }
+        schema: CommonResponses.unauthorized
     })
     @ApiResponse({
         status: 400,
         description: '잘못된 입력 데이터',
-        schema: {
-            type: 'object',
-            properties: {
-                message: { type: 'string', example: 'Validation failed' },
-                error: { type: 'string', example: 'Bad Request' },
-                statusCode: { type: 'number', example: 400 }
-            }
-        }
+        schema: CommonResponses.validationError
     })
     @ApiBearerAuth('access-token')
     @UseGuards(JwtAuthGuard)
@@ -244,74 +196,22 @@ export class PostController {
     })
     @ApiOkResponse({
         description: '게시글 수정 성공',
-        schema: {
-            type: 'object',
-            properties: {
-                id: { type: 'string', example: '507f1f77bcf86cd799439011' },
-                title: { type: 'string', example: '수정된 제목' },
-                content: { type: 'string', example: '수정된 내용...' },
-                author: { 
-                    type: 'object',
-                    properties: {
-                        id: { type: 'string', example: '507f1f77bcf86cd799439012' },
-                        nickname: { type: 'string', example: '여행러버' }
-                    }
-                },
-                region: { 
-                    type: 'object',
-                    properties: {
-                        id: { type: 'number', example: 1 },
-                        name: { type: 'string', example: '서울' }
-                    }
-                },
-                schedule: {
-                    type: 'object',
-                    properties: {
-                        startDate: { type: 'string', example: '2024-01-01' },
-                        endDate: { type: 'string', example: '2024-01-03' }
-                    }
-                },
-                isLiked: { type: 'boolean', example: true },
-                likeCount: { type: 'number', example: 5 },
-                updatedAt: { type: 'string', example: '2024-01-01T00:00:00.000Z' }
-            }
-        }
+        schema: PostDetailResponse
     })
     @ApiResponse({
         status: 401,
         description: '인증 실패',
-        schema: {
-            type: 'object',
-            properties: {
-                message: { type: 'string', example: 'Unauthorized' },
-                error: { type: 'string', example: 'Unauthorized' },
-                statusCode: { type: 'number', example: 401 }
-            }
-        }
+        schema: CommonResponses.unauthorized
     })
     @ApiResponse({
         status: 403,
         description: '권한 없음 - 게시글 작성자가 아님',
-        schema: {
-            type: 'object',
-            properties: {
-                message: { type: 'string', example: 'Forbidden' },
-                error: { type: 'string', example: 'Forbidden' },
-                statusCode: { type: 'number', example: 403 }
-            }
-        }
+        schema: CommonResponses.forbidden
     })
     @ApiResponse({
         status: 404,
         description: '게시글을 찾을 수 없음',
-        schema: {
-            type: 'object',
-            properties: {
-                message: { type: 'string', example: 'Post not found' },
-                error: { type: 'string', example: 'Not Found' },
-                statusCode: { type: 'number', example: 404 }
-            }
-        }
+        schema: CommonResponses.notFound
     })
     @UseGuards(JwtAuthGuard)
     @Patch('/:id')
