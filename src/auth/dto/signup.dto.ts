@@ -1,4 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, ApiHideProperty } from "@nestjs/swagger";
 import { IsArray, IsDate, IsEnum, IsOptional, IsString } from "class-validator";
 import { Gender } from "src/constants/user.constants";
 import { Region } from "src/constants/region-list.constant";
@@ -33,15 +33,15 @@ export class SignUpDto {
             @IsString()
             userDescription:string;
 
-            @ApiProperty({description:'작성한 게시글 목록'})
+            @ApiHideProperty()
             @IsOptional()
             wrotePost:string[];
 
-            @ApiProperty({description:'하트 누른 게시글 목록'})
+            @ApiHideProperty()
             @IsOptional()
             likePostId:string[];
 
-            @ApiProperty({description:'관심지역 목록'})
+            @ApiHideProperty()
             @IsOptional()
             interestRegion:Region[];
 }
