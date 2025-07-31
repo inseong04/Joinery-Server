@@ -5,6 +5,7 @@ import { JwtAuthGuard } from 'src/auth/guard/auth.guard';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { Region } from 'src/constants/region-list.constant';
 import { UserUpdateDto } from './dto/user.update.dto';
+import { CommonResponses, UserResponse } from '../swagger/responses';
 
 @ApiTags('User')
 @Controller('user')
@@ -22,32 +23,12 @@ export class UserController {
     })
     @ApiOkResponse({
         description: '사용자 정보 수정 성공',
-        schema: {
-            type: 'object',
-            properties: {
-                id: { type: 'string', example: '507f1f77bcf86cd799439011' },
-                nickname: { type: 'string', example: '새로운닉네임' },
-                userDescription: { type: 'string', example: '수정된 자기소개' },
-                tripStyle: { 
-                    type: 'array', 
-                    items: { type: 'string' },
-                    example: ['자연', '문화', '맛집']
-                },
-                updatedAt: { type: 'string', example: '2024-01-01T00:00:00.000Z' }
-            }
-        }
+        schema: UserResponse
     })
     @ApiResponse({
         status: 401,
         description: '인증 실패',
-        schema: {
-            type: 'object',
-            properties: {
-                message: { type: 'string', example: 'Unauthorized' },
-                error: { type: 'string', example: 'Unauthorized' },
-                statusCode: { type: 'number', example: 401 }
-            }
-        }
+        schema: CommonResponses.unauthorized
     })
     @UseGuards(JwtAuthGuard)
     @Patch('')
@@ -67,40 +48,12 @@ export class UserController {
     })
     @ApiOkResponse({
         description: '사용자 정보 조회 성공',
-        schema: {
-            type: 'object',
-            properties: {
-                id: { type: 'string', example: '507f1f77bcf86cd799439011' },
-                username: { type: 'string', example: 'user123' },
-                nickname: { type: 'string', example: '여행러버' },
-                gender: { type: 'number', example: 0, description: '0: 남자, 1: 여자' },
-                birthDate: { type: 'string', example: '1990-01-01' },
-                tripStyle: { 
-                    type: 'array', 
-                    items: { type: 'string' },
-                    example: ['자연', '문화', '맛집']
-                },
-                userDescription: { type: 'string', example: '여행을 좋아하는 사람입니다.' },
-                interestRegion: { 
-                    type: 'array', 
-                    items: { type: 'object' },
-                    example: [{ id: 1, name: '서울' }, { id: 2, name: '부산' }]
-                },
-                createdAt: { type: 'string', example: '2024-01-01T00:00:00.000Z' }
-            }
-        }
+        schema: UserResponse
     })
     @ApiResponse({
         status: 404,
         description: '사용자를 찾을 수 없음',
-        schema: {
-            type: 'object',
-            properties: {
-                message: { type: 'string', example: 'User not found' },
-                error: { type: 'string', example: 'Not Found' },
-                statusCode: { type: 'number', example: 404 }
-            }
-        }
+        schema: CommonResponses.notFound
     })
     @Get('/:id')
     async getUser(@Param('id') id:string){
@@ -113,21 +66,14 @@ export class UserController {
     })
     @ApiBearerAuth('access-token')
     @ApiBody({
-        description: '관심지역 목록',
+        description: '관심지역 ID 목록 (숫자 배열)',
         schema: {
             type: 'array',
             items: {
-                type: 'object',
-                properties: {
-                    id: { type: 'number', example: 1 },
-                    name: { type: 'string', example: '서울' }
-                }
+                type: 'number',
+                description: '지역 ID (0: 경기도, 1: 강원도, 2: 충청북도, 3: 충청남도, 4: 경상북도, 5: 경상남도, 6: 전라북도, 7: 전라남도, 8: 제주도, 9: 광주광역시, 10: 대구광역시, 11: 대전광역시, 12: 부신광역시, 13: 울산광역시, 14: 서울특별시)'
             },
-            example: [
-                { id: 1, name: '서울' },
-                { id: 2, name: '부산' },
-                { id: 3, name: '제주' }
-            ]
+            example: [14, 8, 5]
         }
     })
     @ApiOkResponse({
@@ -163,7 +109,7 @@ export class UserController {
     })
     @UseGuards(JwtAuthGuard)
     @Patch('/interest-region')
-    async updateInterestRegion(@CurrentUser() id: string, @Body() interestRegionList: Region[]){
+    async updateInterestRegion(@CurrentUser() id: string, @Body() interestRegionList: number[]){
         return this.userService.updateInterestRegion(id, interestRegionList);
     }
 
@@ -173,14 +119,11 @@ export class UserController {
     })
     @ApiBearerAuth('access-token')
     @ApiBody({
-        description: '삭제할 관심지역',
+        description: '삭제할 관심지역 ID',
         schema: {
-            type: 'object',
-            properties: {
-                id: { type: 'number', example: 1 },
-                name: { type: 'string', example: '서울' }
-            },
-            example: { id: 1, name: '서울' }
+            type: 'number',
+            description: '지역 ID (0: 경기도, 1: 강원도, 2: 충청북도, 3: 충청남도, 4: 경상북도, 5: 경상남도, 6: 전라북도, 7: 전라남도, 8: 제주도, 9: 광주광역시, 10: 대구광역시, 11: 대전광역시, 12: 부신광역시, 13: 울산광역시, 14: 서울특별시)',
+            example: 14
         }
     })
     @ApiOkResponse({
@@ -227,7 +170,7 @@ export class UserController {
     })
     @UseGuards(JwtAuthGuard)
     @Delete('/interest-region')
-    async deleteInterestRegion(@CurrentUser() id:string, @Body() deleteInterestRegion: Region){
+    async deleteInterestRegion(@CurrentUser() id:string, @Body() deleteInterestRegion: number){
         return this.userService.deleteInterestRegion(id, deleteInterestRegion);
     }
 }

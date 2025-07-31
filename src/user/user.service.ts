@@ -28,11 +28,15 @@ export class UserService {
         );
     }
 
-    async updateInterestRegion(id: string, interestRegionList: Region[]){
-        return await this.verificationModel.findByIdAndUpdate(id, {$addToSet:{ interestRegion: { $each: interestRegionList}}});
+    async updateInterestRegion(id: string, interestRegionList: number[]){
+        // 숫자 배열을 Region enum으로 변환
+        const regionList = interestRegionList.map(regionId => Region[regionId]);
+        return await this.verificationModel.findByIdAndUpdate(id, {$addToSet:{ interestRegion: { $each: regionList}}});
     }
 
-    async deleteInterestRegion(id: string, deleteInterestRegion: Region){
-        return await this.verificationModel.updateOne({_id:id}, {$pull:{interestRegion: deleteInterestRegion}});   
+    async deleteInterestRegion(id: string, deleteInterestRegion: number){
+        // 숫자를 Region enum으로 변환
+        const regionToDelete = Region[deleteInterestRegion];
+        return await this.verificationModel.updateOne({_id:id}, {$pull:{interestRegion: regionToDelete}});   
     }
 }

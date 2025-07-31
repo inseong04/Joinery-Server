@@ -9,6 +9,7 @@ import { RegionPost } from './model/region.post.model';
 import { FindRegionDto } from './dto/find.region.dto';
 import { isValidObjectId } from 'mongoose';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { CommonResponses, PostDetailResponse, PopularRegionsResponse } from '../swagger/responses';
 
 @ApiTags('Post')
 @Controller('post')
@@ -28,62 +29,17 @@ export class PostController {
     })
     @ApiOkResponse({
         description: '게시글 조회 성공',
-        schema: {
-            type: 'object',
-            properties: {
-                id: { type: 'string', example: '507f1f77bcf86cd799439011' },
-                title: { type: 'string', example: '서울 여행 후기' },
-                content: { type: 'string', example: '서울에서 즐거운 시간을 보냈습니다...' },
-                author: { 
-                    type: 'object',
-                    properties: {
-                        id: { type: 'string', example: '507f1f77bcf86cd799439012' },
-                        nickname: { type: 'string', example: '여행러버' }
-                    }
-                },
-                region: { 
-                    type: 'object',
-                    properties: {
-                        id: { type: 'number', example: 1 },
-                        name: { type: 'string', example: '서울' }
-                    }
-                },
-                schedule: {
-                    type: 'object',
-                    properties: {
-                        startDate: { type: 'string', example: '2024-01-01' },
-                        endDate: { type: 'string', example: '2024-01-03' }
-                    }
-                },
-                isLiked: { type: 'boolean', example: true },
-                likeCount: { type: 'number', example: 5 },
-                createdAt: { type: 'string', example: '2024-01-01T00:00:00.000Z' }
-            }
-        }
+        schema: PostDetailResponse
     })
     @ApiResponse({
         status: 401,
         description: '인증 실패',
-        schema: {
-            type: 'object',
-            properties: {
-                message: { type: 'string', example: 'Unauthorized' },
-                error: { type: 'string', example: 'Unauthorized' },
-                statusCode: { type: 'number', example: 401 }
-            }
-        }
+        schema: CommonResponses.unauthorized
     })
     @ApiResponse({
         status: 404,
         description: '게시글을 찾을 수 없음',
-        schema: {
-            type: 'object',
-            properties: {
-                message: { type: 'string', example: 'Post not found' },
-                error: { type: 'string', example: 'Not Found' },
-                statusCode: { type: 'number', example: 404 }
-            }
-        }
+        schema: CommonResponses.notFound
     })
     @ApiBearerAuth('access-token')
     @UseGuards(JwtAuthGuard)
@@ -121,39 +77,17 @@ export class PostController {
     })
     @ApiOkResponse({
         description: '좋아요 업데이트 성공',
-        schema: {
-            type: 'object',
-            properties: {
-                id: { type: 'string', example: '507f1f77bcf86cd799439011' },
-                title: { type: 'string', example: '서울 여행 후기' },
-                isLiked: { type: 'boolean', example: true },
-                likeCount: { type: 'number', example: 6 }
-            }
-        }
+        schema: PostDetailResponse
     })
     @ApiResponse({
         status: 401,
         description: '인증 실패',
-        schema: {
-            type: 'object',
-            properties: {
-                message: { type: 'string', example: 'Unauthorized' },
-                error: { type: 'string', example: 'Unauthorized' },
-                statusCode: { type: 'number', example: 401 }
-            }
-        }
+        schema: CommonResponses.unauthorized
     })
     @ApiResponse({
         status: 404,
         description: '게시글을 찾을 수 없음',
-        schema: {
-            type: 'object',
-            properties: {
-                message: { type: 'string', example: 'Post not found' },
-                error: { type: 'string', example: 'Not Found' },
-                statusCode: { type: 'number', example: 404 }
-            }
-        }
+        schema: CommonResponses.notFound
     })
     @UseGuards(JwtAuthGuard)
     @Patch('/like/:id')
@@ -167,24 +101,7 @@ export class PostController {
     })
     @ApiOkResponse({
         description: '인기 여행지 목록 조회 성공',
-        schema: {
-            type: 'array',
-            items: {
-                type: 'object',
-                properties: {
-                    count: { type: 'number', example: 9, description: '해당 지역의 게시글 수' },
-                    regionId: { type: 'number', example: 3, description: '지역 ID' },
-                    regionName: { type: 'string', example: '서울', description: '지역명' }
-                }
-            },
-            example: [
-                { count: 15, regionId: 1, regionName: '서울' },
-                { count: 12, regionId: 2, regionName: '부산' },
-                { count: 8, regionId: 3, regionName: '제주' },
-                { count: 6, regionId: 4, regionName: '경주' },
-                { count: 4, regionId: 5, regionName: '강릉' }
-            ]
-        }
+        schema: PopularRegionsResponse
     })
     @Get('/region/popular')
     async getPopularRegions(){
