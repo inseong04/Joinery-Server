@@ -123,4 +123,13 @@ export class PostService {
         });
         return newPost.save();
     }
+
+    async updatePost(id: string, updateData: any, userId: string): Promise<DetailPost | null> {
+        await this.PostModel.findByIdAndUpdate(
+            id,
+            { $set: updateData },
+            { new: true }
+        ).lean();
+        return this.getPost(id, userId);
+    }
 }

@@ -3,10 +3,21 @@ import { UserService } from './user.service';
 import { ApiBearerAuth, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guard/auth.guard';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import { Region } from 'src/constants/region-list.constant';
+import { UserUpdateDto } from './dto/user.update.dto';
 
 @Controller('user')
 export class UserController {
     constructor(private readonly userService: UserService){}
+
+    //swagger 추가
+    @ApiOperation({summary:'유저 정보 수정'})
+    @ApiBearerAuth('token')
+    @UseGuards(JwtAuthGuard)
+    @Patch('')
+    async updateUser(@CurrentUser() id: string, userUpdateDto: UserUpdateDto){
+        return await this.userService.updateUser(id, userUpdateDto);
+    }
 
     @ApiOperation({summary:'특정 id의 유저 정보를 불러옴'})
     @ApiParam({name:'id', type:'string'})

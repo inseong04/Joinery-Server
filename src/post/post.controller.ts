@@ -33,7 +33,7 @@ export class PostController {
     @ApiBearerAuth('token')
     @ApiBody({})
     @UseGuards(JwtAuthGuard)
-    @Patch('/:id')
+    @Patch('/like/:id')
     async updateLike(@Param('id')id:string, @CurrentUser() userId: string, isDelete: boolean): Promise<DetailPost | null>{
         return this.updateLike(id, userId, isDelete);
     }
@@ -64,4 +64,17 @@ export class PostController {
         return this.postService.createPost(postCreateDto);
     }
 
+    @ApiOperation({summary:'게시글 일부 수정'})
+    @ApiParam({name:'id', type:'string'})
+    @ApiBearerAuth('token')
+    @UseGuards(JwtAuthGuard)
+    @Patch('/:id')
+    async updatePost(
+        @Param('id') id: string,
+        @Body() updateDto: any,
+        @CurrentUser() userId: string
+    ): Promise<DetailPost | null> {
+        // 권한 체크 등은 필요시 추가
+        return this.postService.updatePost(id, updateDto, userId);
+    }
 }

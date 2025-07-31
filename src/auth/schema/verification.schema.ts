@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { ApiProperty } from "@nestjs/swagger";
 import { Gender } from "src/constants/user.constants";
+import { Region } from "src/constants/region-list.constant";
 
 @Schema({timestamps: true})
 export class Verification {
@@ -41,7 +42,7 @@ export class Verification {
         likePostId:string[];
 
         @ApiProperty({description:'관심지역 목록'})
-        @Prop({type:[Region]})
+        @Prop({type:[Number], enum: Object.values(Region)})
         interestRegion:Region[];
 }
 export const VerificationSchema = SchemaFactory.createForClass(Verification);
