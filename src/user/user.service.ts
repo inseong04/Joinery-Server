@@ -68,14 +68,18 @@ export class UserService {
     }
 
     async updateInterestRegion(id: string, interestRegionList: number[]){
-        // 숫자 배열을 Region enum으로 변환
-        const regionList = interestRegionList.map(regionId => Region[regionId]);
-        return await this.verificationModel.findByIdAndUpdate(id, {$addToSet:{ interestRegion: { $each: regionList}}});
+        // 숫자 배열을 그대로 사용 (Region enum 값이 숫자이므로)
+        return await this.verificationModel.findByIdAndUpdate(
+            id, 
+            {$addToSet:{ interestRegion: { $each: interestRegionList}}},
+            {new: true}  // 업데이트 후 데이터 반환
+        );
     }
 
     async deleteInterestRegion(id: string, deleteInterestRegion: number){
-        // 숫자를 Region enum으로 변환
-        const regionToDelete = Region[deleteInterestRegion];
-        return await this.verificationModel.updateOne({_id:id}, {$pull:{interestRegion: regionToDelete}});   
+        // 숫자를 그대로 사용 (Region enum 값이 숫자이므로)
+        await this.verificationModel.updateOne({_id:id}, {$pull:{interestRegion: deleteInterestRegion}});
+        // 업데이트 후 사용자 정보 반환
+        return await this.verificationModel.findById(id);
     }
 }
