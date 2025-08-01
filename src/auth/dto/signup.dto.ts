@@ -43,5 +43,12 @@ export class SignUpDto {
 
             @ApiHideProperty()
             @IsOptional()
+            joinPostId:string[];
+
+            @ApiHideProperty()
+            @IsOptional()
             interestRegion:Region[];
+
+
+
 }

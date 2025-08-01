@@ -60,6 +60,16 @@ export class UserController {
         return this.userService.getUser(id);
     }
 
+    @ApiOperation({summary:'참여한 동행 목록'})
+    @ApiBearerAuth('token')
+    @UseGuards(JwtAuthGuard)
+    @Get('/application-post')
+    async getApplicationPost(@CurrentUser() id: string){
+        return this.userService.getApplicationPost(id);
+    }
+
+    @ApiOperation({summary:'작성한 동행'})
+    @ApiBearerAuth('token')
     @UseGuards(JwtAuthGuard)
     @Get('/wrote-post')
     async getUserWrotePost(@CurrentUser() id: string) {

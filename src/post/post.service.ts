@@ -63,9 +63,14 @@ export class PostService {
         } as DetailPost;
     }
 
-    async updateLike(id: string, userId: string){
-        await this.PostModel.findByIdAndUpdate(id, {$addToSet: {likedUserId: userId}},{new: true});
-        await this.verificationModel.findByIdAndUpdate(userId, {$addToSet: {likePostId: id}}, {new:true})
+    async updateLike(id: string, userId: string, isDelete: boolean){
+        if (isDelete) {
+            await this.PostModel.findByIdAndUpdate(id, {$pull: {likedUserId: userId}});
+            await this.verificationModel.findByIdAndUpdate(userId, {$pull: {likePostId: id}});
+        } else {
+            await this.PostModel.findByIdAndUpdate(id, {$addToSet: {likedUserId: userId}},{new: true});
+            await this.verificationModel.findByIdAndUpdate(userId, {$addToSet: {likePostId: id}}, {new:true});
+        }
         return {message:"success"}
     }
 
@@ -101,7 +106,7 @@ export class PostService {
             }
         ])
     }
-    async createPost(postCreateDto: PostCreateDto): Promise<PostSchema> {
+    async createPost(userId: string, postCreateDto: PostCreateDto): Promise<PostSchema> {
 
         if (postCreateDto.schedule) {
 
@@ -117,9 +122,15 @@ export class PostService {
             postCreateDto.endDate = new Date(postCreateDto.endDate) as any;
         }
 
-        const newPost = await new this.PostModel(postCreateDto);
+        // JWT token에서 받은 userId를 authorId로 설정
+        const postData = {
+            ...postCreateDto,   
+            authorId: userId
+        };
+
+        const newPost = await new this.PostModel(postData);
         // User Collection에 wrotePost(작성한 게시글)에 해당 게시글 _id 추가
-        await this.verificationModel.findByIdAndUpdate(postCreateDto.authorId, {
+        await this.verificationModel.findByIdAndUpdate(userId, {
             $addToSet: {wrotePost: newPost._id}
         });
         return newPost.save();

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiParam, ApiTags, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guard/auth.guard';
 import { PostCreateDto } from './dto/post.create.dto';
@@ -91,15 +91,11 @@ export class PostController {
     })
     @UseGuards(JwtAuthGuard)
     @Patch('/like/:id')
-    async updateLike(@Param('id')id:string, @CurrentUser() userId: string): Promise<any>{
-        return this.postService.updateLike(id, userId);
+    async updateLike(@Param('id')id:string, @CurrentUser() userId: string, @Body() body: {isDelete: boolean}): Promise<any>{
+        return this.postService.updateLike(id, userId, body.isDelete);
     }
 
-    @UseGuards(JwtAuthGuard)
-    @Delete('/like/:id')
-    async deleteLike(@Param('id') id:string, @CurrentUser() userId: string): Promise<any>{
-        return this.postService.deleteLike(id, userId);
-    }
+
 
     @ApiOperation({
         summary:'인기 여행지 목록',
@@ -161,8 +157,8 @@ export class PostController {
     @ApiBearerAuth('access-token')
     @UseGuards(JwtAuthGuard)
     @Post('/')
-    async create(@Body() postCreateDto: PostCreateDto) : Promise<PostSchema> {
-        return this.postService.createPost(postCreateDto);
+    async create(@CurrentUser() userId: string, @Body() postCreateDto: PostCreateDto) : Promise<PostSchema> {
+        return this.postService.createPost(userId, postCreateDto);
     }
 
     @ApiOperation({

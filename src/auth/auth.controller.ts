@@ -59,7 +59,7 @@ export class AuthController {
         description: '회원가입 실패 - 이미 존재하는 아이디',
         schema: CommonResponses.conflict
     })
-    @Post()
+    @Post('/sign-up')
     async create(@Body() signUpDto:SignUpDto) : Promise<Verification> {
         return this.authService.create(signUpDto);
     }

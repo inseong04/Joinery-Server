@@ -41,6 +41,10 @@ export class Verification {
         @Prop({type:[String]})
         likePostId:string[];
 
+        @ApiProperty({description:'신청완료된 게시글 목록'})
+        @Prop({type:[String]})
+        joinPostId:string[];
+
         @ApiProperty({description:'관심지역 목록'})
         @Prop({type:[Number], enum: Object.values(Region)})
         interestRegion:Region[];
