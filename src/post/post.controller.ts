@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiParam, ApiTags, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guard/auth.guard';
 import { PostCreateDto } from './dto/post.create.dto';
@@ -53,7 +53,7 @@ export class PostController {
 
     @ApiOperation({
         summary:'좋아요 업데이트',
-        description: '게시글의 좋아요를 추가하거나 삭제합니다. isDelete가 true면 좋아요 삭제, false면 좋아요 추가입니다.'
+        description: '게시글의 좋아요를 추가합니다.'
     })
     @ApiParam({
         name:'id', 
@@ -62,19 +62,6 @@ export class PostController {
         example: '507f1f77bcf86cd799439011'
     })
     @ApiBearerAuth('access-token')
-    @ApiBody({
-        description: '좋아요 업데이트 정보',
-        schema: {
-            type: 'object',
-            properties: {
-                isDelete: {
-                    type: 'boolean',
-                    description: '좋아요 삭제 여부 (true: 삭제, false: 추가)',
-                    example: false
-                }
-            }
-        }
-    })
     @ApiOkResponse({
         description: '좋아요 업데이트 성공',
         schema: PostDetailResponse
@@ -92,7 +79,14 @@ export class PostController {
     @UseGuards(JwtAuthGuard)
     @Patch('/like/:id')
     async updateLike(@Param('id')id:string, @CurrentUser() userId: string, @Body() body: {isDelete: boolean}): Promise<any>{
-        return this.postService.updateLike(id, userId, body.isDelete);
+        return this.postService.updateLike(id, userId);
+    }
+
+    @ApiOperation({summary:'게시글 좋아요 삭제'})
+    @UseGuards(JwtAuthGuard)
+    @Delete('/like/:id')
+    async deleteLike(@Param('id')id:string, @CurrentUser() userId:string) {
+        return this.postService.deleteLike(id, userId);
     }
 
 
@@ -219,4 +213,48 @@ export class PostController {
         // 권한 체크 등은 필요시 추가
         return this.postService.updatePost(id, updateDto, userId);
     }
+
+    @ApiOperation({
+        summary:'게시글 삭제',
+        description: '기존 게시글을 삭제합니다. 작성자만 삭제할 수 있습니다.'
+    })
+    @ApiParam({
+        name:'id', 
+        type:'string',
+        description: '삭제할 게시글의 ID',
+        example: '507f1f77bcf86cd799439011'
+    })
+    @ApiBearerAuth('access-token')
+    @ApiOkResponse({
+        description: '게시글 삭제 성공',
+        schema: {
+            type: 'object',
+            properties: {
+                message: { type: 'string', example: 'Post deleted successfully' }
+            }
+        }
+    })
+    @ApiResponse({
+        status: 401,
+        description: '인증 실패',
+        schema: CommonResponses.unauthorized
+    })
+    @ApiResponse({
+        status: 403,
+        description: '권한 없음 - 게시글 작성자가 아님',
+        schema: CommonResponses.forbidden
+    })
+    @ApiResponse({
+        status: 404,
+        description: '게시글을 찾을 수 없음',
+        schema: CommonResponses.notFound
+    })
+    @UseGuards(JwtAuthGuard)
+    @Delete('/:id')
+    async deletePost(@Param('id') id: string, @CurrentUser() userId: string) {
+        // TODO: 권한 체크 추가 (작성자만 삭제 가능)
+        return this.postService.deletePost(id);
+    }
+
+
 }

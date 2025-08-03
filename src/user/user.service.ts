@@ -7,6 +7,8 @@ import { UserUpdateDto } from './dto/user.update.dto';
 import { PostSchema } from 'src/post/schema/post.schema';
 import { ApplicationPostModel } from './model/application.post.model';
 import DateUtils from 'src/constants/date.utill';
+import { UserPostModel } from './model/user.post.model';
+import { PostGetDto } from 'src/post/dto/post.get.dto';
 
 @Injectable()
 export class UserService {
@@ -37,34 +39,33 @@ export class UserService {
     }
 
     async getApplicationPost(id: string){
-        const user = await this.verificationModel.findById(id).select('likedUserId');
-        const userLikedUserId = (user as any)?.likedUserId as string[] | undefined;
-        if (!user || !userLikedUserId) {
+        const user = await this.verificationModel.findById(id).select('likePostId');
+        const likedPostIdList = (user as any)?.likePostId as string[] | undefined;
+        if (!user || !likedPostIdList) {
             return {};
         }
-        const likePostId: string[] = userLikedUserId;
-        const post: ApplicationPostModel | null = await this.postModel.findById(id);
-        if (!post) {
-            throw new Error('error');
+
+        let userLikedPosts: UserPostModel[] = [];
+        for (const item of likedPostIdList) {
+            const post = await this.postModel.findById(item);
+            const likedPost : UserPostModel = new UserPostModel();
+            likedPost._id = post?._id ? post._id.toString() : null;
+            likedPost.region_id = post?.region_id ? post.region_id : null;
+            const author = await this.verificationModel.findById(post?.authorId).select('nickname').lean();
+            likedPost.username = author ? author.nickname : null;
+            likedPost.startDate = post?.startDate ? post.startDate.toString() : null;
+            likedPost.endDate = post?.endDate ? post.endDate.toString() : null;
+            likedPost.isJoin = post?.memberId.includes(id) ? true : false;
+            const now = new Date();
+            likedPost.isEnded = (now >= post!.endDate) ? true: false; 
+            userLikedPosts.push(likedPost);
         }
-
-        const name = await this.verificationModel.findById(post.authorId).select('nickname').lean();
-        const isJoin : boolean = post.memberId.includes(user._id.toString()) ? true : false;
-        post.startDate = DateUtils.formatDateHour(post.startDate);
-        post.endDate = DateUtils.formatDateHour(post.endDate);
-
-        // authorId, memberId, likedUserId 제외
-        const postObj = (post as any).toObject ? (post as any).toObject() : post;
-        const { authorId, memberId, likedUserId: postLikedUserId, ...rest } = postObj;
-        return {
-            ...rest,
-            name: name,
-            isJoin
-        };
+        return userLikedPosts;
     }
 //null 로 반환됨
     async getUserWrotePost(id: string){
-        return await this.verificationModel.findById(id).select('wrotePost');
+        const result = await this.verificationModel.findById(id).select('wrotePost');
+        return result;
     }
 
     async updateInterestRegion(id: string, interestRegionList: number[]){
@@ -82,4 +83,6 @@ export class UserService {
         // 업데이트 후 사용자 정보 반환
         return await this.verificationModel.findById(id);
     }
+
+
 }

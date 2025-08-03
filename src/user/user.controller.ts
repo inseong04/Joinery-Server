@@ -3,7 +3,6 @@ import { UserService } from './user.service';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags, ApiBody, ApiOkResponse, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guard/auth.guard';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
-import { Region } from 'src/constants/region-list.constant';
 import { UserUpdateDto } from './dto/user.update.dto';
 import { CommonResponses, UserResponse } from '../swagger/responses';
 
@@ -55,25 +54,94 @@ export class UserController {
         description: '사용자를 찾을 수 없음',
         schema: CommonResponses.notFound
     })
-    @Get('/:id')
-    async getUser(@Param('id') id:string){
-        return this.userService.getUser(id);
-    }
-
-    @ApiOperation({summary:'참여한 동행 목록'})
-    @ApiBearerAuth('token')
+    @ApiOperation({
+        summary:'참여한 동행 목록',
+        description: '현재 로그인한 사용자가 참여한 동행 게시글 목록을 조회합니다.'
+    })
+    @ApiBearerAuth('access-token')
+    @ApiOkResponse({
+        description: '참여한 동행 목록 조회 성공',
+        schema: {
+            type: 'object',
+            properties: {
+                authorId: { type: 'string', example: '507f1f77bcf86cd799439012', description: '작성자 ID' },
+                region_id: { type: 'number', example: 1, description: '지역 ID' },
+                startDate: { type: 'string', example: '2024-01-01 00:00', description: '시작 날짜 (YYYY-MM-DD HH 형식)' },
+                endDate: { type: 'string', example: '2024-01-03 00:00', description: '종료 날짜 (YYYY-MM-DD HH 형식)' },
+                createdAt: { type: 'string', example: '2024-01-01T00:00:00.000Z', description: '생성 날짜' },
+                isJoin: { type: 'boolean', example: true, description: '참여 여부' },
+                isEnded: { type: 'boolean', example: false, description: '여행 종료 여부' }
+            }
+        }
+    })
+    @ApiResponse({
+        status: 401,
+        description: '인증 실패',
+        schema: CommonResponses.unauthorized
+    })
     @UseGuards(JwtAuthGuard)
     @Get('/application-post')
     async getApplicationPost(@CurrentUser() id: string){
         return this.userService.getApplicationPost(id);
     }
 
-    @ApiOperation({summary:'작성한 동행'})
-    @ApiBearerAuth('token')
+    @ApiOperation({
+        summary:'작성한 동행',
+        description: '현재 로그인한 사용자가 작성한 동행 게시글 목록을 조회합니다.'
+    })
+    @ApiBearerAuth('access-token')
+    @ApiOkResponse({
+        description: '작성한 동행 목록 조회 성공',
+        schema: {
+            type: 'object',
+            properties: {
+                id: { type: 'string', example: '507f1f77bcf86cd799439011' },
+                wrotePost: { 
+                    type: 'array', 
+                    items: { type: 'string' },
+                    example: ['507f1f77bcf86cd799439012', '507f1f77bcf86cd799439013'],
+                    description: '작성한 게시글 ID 목록'
+                }
+            }
+        }
+    })
+    @ApiResponse({
+        status: 401,
+        description: '인증 실패',
+        schema: CommonResponses.unauthorized
+    })
     @UseGuards(JwtAuthGuard)
     @Get('/wrote-post')
     async getUserWrotePost(@CurrentUser() id: string) {
+        console.log("qwer");
+        console.log("User ID:", id);
         return this.userService.getUserWrotePost(id);
+    }
+
+
+
+    @ApiOperation({
+        summary:'특정 사용자 정보 조회',
+        description: '사용자 ID로 특정 사용자의 정보를 조회합니다.'
+    })
+    @ApiParam({
+        name:'id', 
+        type:'string',
+        description: '조회할 사용자의 ID',
+        example: '507f1f77bcf86cd799439011'
+    })
+    @ApiOkResponse({
+        description: '사용자 정보 조회 성공',
+        schema: UserResponse
+    })
+    @ApiResponse({
+        status: 404,
+        description: '사용자를 찾을 수 없음',
+        schema: CommonResponses.notFound
+    })
+    @Get('/:id')
+    async getUser(@Param('id') id:string){
+        return this.userService.getUser(id);
     }
 
     @ApiOperation({
