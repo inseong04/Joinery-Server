@@ -11,7 +11,7 @@ async function bootstrap() {
   // swagger API
     const options = new DocumentBuilder()
     .setTitle('Joinery API')
-    .setDescription('여행 커뮤니티 플랫폼 Joinery의 REST API 문서입니다.')
+    .setDescription('여행 커뮤니티 플랫폼 Joinery의 REST API 문서')
     .setVersion('1.0')
     .addServer('http://localhost:3000/', 'Local environment')
     .addServer('https://staging.yourapi.com/', 'Staging')
