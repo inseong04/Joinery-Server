@@ -36,25 +36,6 @@ export class UserController {
     }
 
     @ApiOperation({
-        summary:'특정 사용자 정보 조회',
-        description: '사용자 ID로 특정 사용자의 정보를 조회합니다.'
-    })
-    @ApiParam({
-        name:'id', 
-        type:'string',
-        description: '조회할 사용자의 ID',
-        example: '507f1f77bcf86cd799439011'
-    })
-    @ApiOkResponse({
-        description: '사용자 정보 조회 성공',
-        schema: UserResponse
-    })
-    @ApiResponse({
-        status: 404,
-        description: '사용자를 찾을 수 없음',
-        schema: CommonResponses.notFound
-    })
-    @ApiOperation({
         summary:'참여한 동행 목록',
         description: '현재 로그인한 사용자가 참여한 동행 게시글 목록을 조회합니다.'
     })
@@ -64,13 +45,36 @@ export class UserController {
         schema: {
             type: 'object',
             properties: {
-                authorId: { type: 'string', example: '507f1f77bcf86cd799439012', description: '작성자 ID' },
-                region_id: { type: 'number', example: 1, description: '지역 ID' },
-                startDate: { type: 'string', example: '2024-01-01 00:00', description: '시작 날짜 (YYYY-MM-DD HH 형식)' },
-                endDate: { type: 'string', example: '2024-01-03 00:00', description: '종료 날짜 (YYYY-MM-DD HH 형식)' },
-                createdAt: { type: 'string', example: '2024-01-01T00:00:00.000Z', description: '생성 날짜' },
-                isJoin: { type: 'boolean', example: true, description: '참여 여부' },
-                isEnded: { type: 'boolean', example: false, description: '여행 종료 여부' }
+                ended: {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            _id: { type: 'string', example: '507f1f77bcf86cd799439011' },
+                            region_id: { type: 'number', example: 1 },
+                            username: { type: 'string', example: '사용자닉네임' },
+                            startDate: { type: 'string', example: '2024-01-01' },
+                            endDate: { type: 'string', example: '2024-01-03' },
+                            isJoin: { type: 'boolean', example: true },
+                            isEnded: { type: 'boolean', example: true }
+                        }
+                    }
+                },
+                notEnded: {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            _id: { type: 'string', example: '507f1f77bcf86cd799439012' },
+                            region_id: { type: 'number', example: 2 },
+                            username: { type: 'string', example: '사용자닉네임' },
+                            startDate: { type: 'string', example: '2024-02-01' },
+                            endDate: { type: 'string', example: '2024-02-03' },
+                            isJoin: { type: 'boolean', example: false },
+                            isEnded: { type: 'boolean', example: false }
+                        }
+                    }
+                }
             }
         }
     })
@@ -95,12 +99,35 @@ export class UserController {
         schema: {
             type: 'object',
             properties: {
-                id: { type: 'string', example: '507f1f77bcf86cd799439011' },
-                wrotePost: { 
-                    type: 'array', 
-                    items: { type: 'string' },
-                    example: ['507f1f77bcf86cd799439012', '507f1f77bcf86cd799439013'],
-                    description: '작성한 게시글 ID 목록'
+                ended: {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            _id: { type: 'string', example: '507f1f77bcf86cd799439011' },
+                            region_id: { type: 'number', example: 1 },
+                            startDate: { type: 'string', example: '2024-01-01' },
+                            endDate: { type: 'string', example: '2024-01-03' },
+                            limitedHeart: { type: 'number', example: 10 },
+                            heart: { type: 'number', example: 5 },
+                            isEnded: { type: 'boolean', example: true }
+                        }
+                    }
+                },
+                notEnded: {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            _id: { type: 'string', example: '507f1f77bcf86cd799439012' },
+                            region_id: { type: 'number', example: 2 },
+                            startDate: { type: 'string', example: '2024-02-01' },
+                            endDate: { type: 'string', example: '2024-02-03' },
+                            limitedHeart: { type: 'number', example: 10 },
+                            heart: { type: 'number', example: 8 },
+                            isEnded: { type: 'boolean', example: false }
+                        }
+                    }
                 }
             }
         }
@@ -113,12 +140,8 @@ export class UserController {
     @UseGuards(JwtAuthGuard)
     @Get('/wrote-post')
     async getUserWrotePost(@CurrentUser() id: string) {
-        console.log("qwer");
-        console.log("User ID:", id);
         return this.userService.getUserWrotePost(id);
     }
-
-
 
     @ApiOperation({
         summary:'특정 사용자 정보 조회',

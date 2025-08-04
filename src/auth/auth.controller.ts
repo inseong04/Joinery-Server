@@ -23,7 +23,16 @@ export class AuthController {
     })
     @ApiCreatedResponse({
         description: '로그인 성공 시 JWT 토큰 반환',
-        schema: LoginResponse
+        schema: {
+            type: 'object',
+            properties: {
+                accessToken: {
+                    type: 'string',
+                    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+                    description: 'JWT 액세스 토큰'
+                }
+            }
+        }
     })
     @ApiResponse({
         status: 401,

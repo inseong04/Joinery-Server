@@ -78,11 +78,35 @@ export class PostController {
     })
     @UseGuards(JwtAuthGuard)
     @Patch('/like/:id')
-    async updateLike(@Param('id')id:string, @CurrentUser() userId: string, @Body() body: {isDelete: boolean}): Promise<any>{
+    async updateLike(@Param('id')id:string, @CurrentUser() userId: string): Promise<any>{
         return this.postService.updateLike(id, userId);
     }
 
-    @ApiOperation({summary:'게시글 좋아요 삭제'})
+    @ApiOperation({
+        summary:'게시글 좋아요 삭제',
+        description: '게시글의 좋아요를 삭제합니다.'
+    })
+    @ApiParam({
+        name:'id', 
+        type:'string',
+        description: '좋아요를 삭제할 게시글의 ID',
+        example: '507f1f77bcf86cd799439011'
+    })
+    @ApiBearerAuth('access-token')
+    @ApiOkResponse({
+        description: '좋아요 삭제 성공',
+        schema: PostDetailResponse
+    })
+    @ApiResponse({
+        status: 401,
+        description: '인증 실패',
+        schema: CommonResponses.unauthorized
+    })
+    @ApiResponse({
+        status: 404,
+        description: '게시글을 찾을 수 없음',
+        schema: CommonResponses.notFound
+    })
     @UseGuards(JwtAuthGuard)
     @Delete('/like/:id')
     async deleteLike(@Param('id')id:string, @CurrentUser() userId:string) {

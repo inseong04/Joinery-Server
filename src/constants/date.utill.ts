@@ -2,7 +2,7 @@ import * as moment from 'moment-timezone';
 
 export default class DateUtils {
 
-    // 2024-04-01
+    // to 2024-04-01
     static momentNow(): string {
         return moment().tz('Asia/Seoul').format('YYYY-MM-DD');
     }
@@ -15,6 +15,15 @@ export default class DateUtils {
    static formatToDateOnly(input: string): string {
     return moment.tz(input, 'YYYY-MM-DD HH', 'Asia/Seoul').format('YYYY-MM-DD');
     }
+
+    static formatDate(date: Date | string): string {
+        if (!(date instanceof Date)) date = new Date(date);
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
    static formatDateHour(date: Date | string): string {
       if (!(date instanceof Date)) date = new Date(date);
       const yyyy = date.getFullYear();
