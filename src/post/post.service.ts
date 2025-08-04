@@ -21,9 +21,10 @@ export class PostService {
     async getRegionPost(regionId:number, findRegionDto: FindRegionDto){
     let result: PreviewPostModel[] = [];
     if (findRegionDto.startDate == null && findRegionDto.endDate == null) {
-            const posts = await this.PostModel.find({region_id: regionId}).select('title startDate endDate limitedHeart heart createdAt').lean();
+            const posts = await this.PostModel.find({region_id: regionId}).select('title startDate endDate limitedHeart heart createdAt authorId').lean();
             const postList: PreviewPostModel[] = await Promise.all(posts.map(async item => {
                 const user = await this.verificationModel.findById(item.authorId).select('nickname').lean();
+                console.log(item);
                 return {
                     title: item.title,
                     username: user?.nickname ?? 'Unknown',
