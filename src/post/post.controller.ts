@@ -142,7 +142,41 @@ export class PostController {
         description: '지역 게시글 목록 조회 성공',
         schema: {
             type: 'array',
-            items: PostDetailResponse
+            items: {
+                type: 'object',
+                properties: {
+                    title: {
+                        type: 'string',
+                        example: '제주도 여행',
+                        description: '게시글 제목'
+                    },
+                    username: {
+                        type: 'string',
+                        example: '여행자',
+                        description: '작성자 닉네임'
+                    },
+                    startDate: {
+                        type: 'string',
+                        example: '2024-01-01',
+                        description: '여행 시작일'
+                    },
+                    endDate: {
+                        type: 'string',
+                        example: '2024-01-03',
+                        description: '여행 종료일'
+                    },
+                    heart: {
+                        type: 'number',
+                        example: 5,
+                        description: '현재 좋아요 수'
+                    },
+                    limitedHeart: {
+                        type: 'number',
+                        example: 10,
+                        description: '최대 좋아요 수'
+                    }
+                }
+            }
         }
     })
     @Get('/region/:id')
