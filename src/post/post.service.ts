@@ -8,6 +8,8 @@ import { FindRegionDto } from './dto/find.region.dto';
 import { Verification } from 'src/auth/schema/verification.schema';
 import { isHeartDto } from './dto/isHeart.dto';
 import { HeartType } from 'src/constants/user.constants';
+import { PreviewPostModel } from './model/preview.post.model';
+import DateUtils from 'src/constants/date.utill';
 
 @Injectable()
 export class PostService {
@@ -17,15 +19,40 @@ export class PostService {
     ){}
 
     async getRegionPost(regionId:number, findRegionDto: FindRegionDto){
-    
-    if (findRegionDto.startDate == null &&findRegionDto.endDate == null ) {
-        return await this.PostModel.find({region_id:regionId});
+    let result: PreviewPostModel[] = [];
+    if (findRegionDto.startDate == null && findRegionDto.endDate == null) {
+            const posts = await this.PostModel.find({region_id: regionId}).select('title startDate endDate limitedHeart heart createdAt').lean();
+            const postList: PreviewPostModel[] = await Promise.all(posts.map(async item => {
+                const user = await this.verificationModel.findById(item.authorId).select('nickname').lean();
+                return {
+                    title: item.title,
+                    username: user?.nickname ?? 'Unknown',
+                    startDate: DateUtils.formatDate(item.startDate),
+                    endDate: DateUtils.formatDate(item.endDate),
+                    heart: item.heart,
+                    limitedHeart: item.limitedHeart,
+                };
+            }));
+            result = postList;
     }
     else {
-        const startDate = new Date(findRegionDto.startDate);
-        const endDate = new Date(findRegionDto.endDate);
-        return await this.PostModel.find({region_id:regionId, startDate:{$gte: startDate}, endDate:{$lte:endDate} });
-    }
+        const filterStartDate = new Date(findRegionDto.startDate);
+        const filterEndDate = new Date(findRegionDto.endDate);
+        const posts = await this.PostModel.find({region_id:regionId, startDate:{$gte: filterStartDate}, endDate:{$lte:filterEndDate} });
+        const postList: PreviewPostModel[] = await Promise.all(posts.map(async item => {
+            const user = await this.verificationModel.findById(item.authorId).select('nickname').lean();
+            return {
+                title: item.title,
+                username: user?.nickname ?? 'Unknown',
+                startDate: DateUtils.formatDate(item.startDate),
+                endDate: DateUtils.formatDate(item.endDate),
+                heart: item.heart,
+                limitedHeart: item.limitedHeart,
+                };
+            }));    
+        result = postList;
+        }
+return result;
     }
 
     private formatDateHour(date: Date | string): string {
