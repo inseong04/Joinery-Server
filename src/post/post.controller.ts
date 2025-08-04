@@ -130,7 +130,7 @@ export class PostController {
     
     @ApiOperation({
         summary:'특정 지역의 게시글 목록',
-        description: '특정 지역의 게시글 목록을 조회합니다. startDate와 endDate를 지정하면 해당 기간의 게시글만 조회됩니다.'
+        description: '특정 지역의 게시글 목록을 조회합니다. startDate와 endDate는 선택사항이며, 지정하면 해당 기간의 게시글만 조회됩니다.'
     })
     @ApiParam({
         name:'id',
