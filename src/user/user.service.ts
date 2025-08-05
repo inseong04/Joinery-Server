@@ -6,7 +6,7 @@ import { Region } from 'src/constants/region-list.constant';
 import { UserUpdateDto } from './dto/user.update.dto';
 import { PostSchema } from 'src/post/schema/post.schema';
 import { ApplicationPostModel } from './model/application.post.model';
-import DateUtils from 'src/constants/date.utill';
+import DateUtils from 'src/post/utils/date.utill';
 import { UserPostModel } from './model/user.post.model';
 import { PostGetDto } from 'src/post/dto/post.get.dto';
 import { UserWrotePostModel } from './model/user.wrote.post.model';

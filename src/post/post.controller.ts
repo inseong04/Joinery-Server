@@ -10,6 +10,7 @@ import { FindRegionDto } from './dto/find.region.dto';
 import { isValidObjectId } from 'mongoose';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { CommonResponses, PostDetailResponse, PopularRegionsResponse } from '../swagger/responses';
+import { PreviewPostModel } from './model/preview.post.model';
 
 @ApiTags('Post')
 @Controller('post')
@@ -314,5 +315,25 @@ export class PostController {
         return this.postService.deletePost(id);
     }
 
-
+    @ApiOperation({
+        summary: '특정 지역의 게시글 목록',
+        description: '특정 지역의 게시글 목록을 조회합니다. regionId로 지역을 필터링할 수 있습니다.'
+    })
+    @ApiParam({
+        name: 'regionId',
+        type: 'number',
+        description: '조회할 지역의 ID',
+        example: 1
+    })
+    @ApiOkResponse({
+        description: '지역 게시글 목록 조회 성공',
+        type: [PreviewPostModel]
+    })
+    @Get('region')
+    async getRegionPost(
+        @Query('regionId') regionId: number,
+        @Query() findRegionDto: FindRegionDto
+    ): Promise<PreviewPostModel[]> {
+        return this.postService.getRegionPost(regionId, findRegionDto);
+    }
 }

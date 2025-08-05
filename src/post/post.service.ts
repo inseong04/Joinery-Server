@@ -9,7 +9,7 @@ import { Verification } from 'src/auth/schema/verification.schema';
 import { isHeartDto } from './dto/isHeart.dto';
 import { HeartType } from 'src/constants/user.constants';
 import { PreviewPostModel } from './model/preview.post.model';
-import DateUtils from 'src/constants/date.utill';
+import DateUtils from 'src/post/utils/date.utill';
 
 @Injectable()
 export class PostService {
@@ -26,12 +26,14 @@ export class PostService {
                 const user = await this.verificationModel.findById(item.authorId).select('nickname').lean();
                 console.log(item);
                 return {
+                    _id: item._id.toString(),
                     title: item.title,
                     username: user?.nickname ?? 'Unknown',
                     startDate: DateUtils.formatDate(item.startDate),
                     endDate: DateUtils.formatDate(item.endDate),
                     heart: item.heart,
                     limitedHeart: item.limitedHeart,
+                    
                 };
             }));
             result = postList;
@@ -43,6 +45,7 @@ export class PostService {
         const postList: PreviewPostModel[] = await Promise.all(posts.map(async item => {
             const user = await this.verificationModel.findById(item.authorId).select('nickname').lean();
             return {
+                _id:item._id.toString(),
                 title: item.title,
                 username: user?.nickname ?? 'Unknown',
                 startDate: DateUtils.formatDate(item.startDate),

@@ -12,7 +12,7 @@ async function bootstrap() {
     const options = new DocumentBuilder()
     .setTitle('Joinery API')
     .setDescription('여행 커뮤니티 플랫폼 Joinery의 REST API 문서')
-    .setVersion('1.0')
+    .setVersion('0.5')
     .addServer('http://localhost:3000/', 'Local environment')
     .addServer('https://staging.yourapi.com/', 'Staging')
     .addServer('https://production.yourapi.com/', 'Production')

@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Verification } from './schema/verification.schema';
 import { SignUpDto } from './dto/signup.dto';
-import DateUtils from 'src/constants/date.utill';
+import DateUtils from 'src/post/utils/date.utill';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { SignInDto } from './dto/signin.dto';
