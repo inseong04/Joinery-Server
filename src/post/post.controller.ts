@@ -146,6 +146,11 @@ export class PostController {
             items: {
                 type: 'object',
                 properties: {
+                    _id: {
+                        type: 'string',
+                        example:'게시글id',
+                        description:'게시글의 _id'
+                    },
                     title: {
                         type: 'string',
                         example: '제주도 여행',
