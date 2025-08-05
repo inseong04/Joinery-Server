@@ -102,7 +102,7 @@ return result;
             heartType: heartType,
             authorName: authorName!.nickname,
             membersName: members
-        } as DetailPost;
+        } as unknown as DetailPost;
     }
 
     async updateLike(id: string, userId: string){
