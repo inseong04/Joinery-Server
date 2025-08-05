@@ -85,12 +85,23 @@ return result;
                 heartType = HeartType.UserOnly;
             }
         } 
+
+        const authorName = await this.verificationModel.findById(post.authorId).select('nickname').lean();
+        const members: string[] = await Promise.all(
+            post.memberId.map(async id => {
+                const user = await this.verificationModel.findById(id).select('nickname').lean();
+                return user?.nickname ?? 'Unknown';
+            })
+        );
+
         // startDate, endDate를 'YYYY-MM-DD HH' string로 변환
         return {
             ...post,
             startDate: this.formatDateHour(post.startDate),
             endDate: this.formatDateHour(post.endDate),
             heartType: heartType,
+            authorName: authorName!.nickname,
+            membersName: members
         } as DetailPost;
     }
 
