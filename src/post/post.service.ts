@@ -31,8 +31,8 @@ export class PostService {
                     username: user?.nickname ?? 'Unknown',
                     startDate: DateUtils.formatDate(item.startDate),
                     endDate: DateUtils.formatDate(item.endDate),
-                    heart: item.heart,
-                    limitedHeart: item.limitedHeart,
+                    heart: item.currentPerson,
+                    limitedHeart: item.maxPerson,
                     
                 };
             }));
@@ -50,8 +50,8 @@ export class PostService {
                 username: user?.nickname ?? 'Unknown',
                 startDate: DateUtils.formatDate(item.startDate),
                 endDate: DateUtils.formatDate(item.endDate),
-                heart: item.heart,
-                limitedHeart: item.limitedHeart,
+                heart: item.currentPerson,
+                limitedHeart: item.maxPerson,
                 };
             }));    
         result = postList;
@@ -162,7 +162,8 @@ return result;
         // JWT token에서 받은 userId를 authorId로 설정
         const postData = {
             ...postCreateDto,   
-            authorId: userId
+            authorId: userId,
+            currentPerson: 1, // 기본값으로 작성자 1명
         };
 
         const newPost = await new this.PostModel(postData);

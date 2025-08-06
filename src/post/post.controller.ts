@@ -215,13 +215,137 @@ export class PostController {
     @ApiBearerAuth('access-token')
     @UseGuards(JwtAuthGuard)
     @Post('/')
+    @ApiOperation({
+        summary:'동행 게시글 생성',
+        description: '새로운 동행 게시글을 생성합니다. 여행 일정, 모집 인원, 여행 스타일 등을 포함합니다.'
+    })
+    @ApiBearerAuth('access-token')
+    @ApiBody({
+        description: '생성할 게시글 정보',
+        schema: {
+            type: 'object',
+            properties: {
+                region_id: { 
+                    type: 'number', 
+                    example: 14, 
+                    description: '지역 ID (0: 경기도, 1: 강원도, 2: 충청북도, 3: 충청남도, 4: 경상북도, 5: 경상남도, 6: 전라북도, 7: 전라남도, 8: 제주도, 9: 광주광역시, 10: 대구광역시, 11: 대전광역시, 12: 부산광역시, 13: 울산광역시, 14: 서울특별시)' 
+                },
+                title: { 
+                    type: 'string', 
+                    example: '제주도 3박 4일 여행', 
+                    description: '게시글 제목' 
+                },
+                description: { 
+                    type: 'string', 
+                    example: '제주도에서 함께 여행할 동행을 구합니다!', 
+                    description: '게시글 설명' 
+                },
+                schedule: {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            title: { type: 'string', example: '첫째 날 - 제주도 도착', description: '일정 제목' },
+                            description: { type: 'string', example: '제주도 공항에서 만나서 호텔 체크인', description: '일정 설명' },
+                            date: { type: 'string', example: '2025-01-21', description: '일정 날짜' }
+                        }
+                    },
+                    description: '여행 일정 목록'
+                },
+                startDate: { 
+                    type: 'string', 
+                    example: '2025-01-21', 
+                    description: '여행 시작 날짜 (YYYY-MM-DD 형식)' 
+                },
+                endDate: { 
+                    type: 'string', 
+                    example: '2025-01-24', 
+                    description: '여행 종료 날짜 (YYYY-MM-DD 형식)' 
+                },
+                maxPerson: { 
+                    type: 'number', 
+                    example: 4, 
+                    description: '모집 인원 수' 
+                },
+
+                likedUserId: { 
+                    type: 'array', 
+                    items: { type: 'string' }, 
+                    example: [], 
+                    description: '좋아요를 누른 사용자 ID 목록 (선택사항)' 
+                },
+                tripStyle: { 
+                    type: 'array', 
+                    items: { type: 'string' }, 
+                    example: ['자연', '맛집', '문화'], 
+                    description: '여행 스타일 (최대 3개)' 
+                }
+            },
+            required: ['region_id', 'title', 'description', 'schedule', 'startDate', 'endDate', 'maxPerson', 'tripStyle']
+        }
+    })
+    @ApiCreatedResponse({
+        description: '게시글 생성 성공',
+        schema: {
+            type: 'object',
+            properties: {
+                _id: { type: 'string', example: '507f1f77bcf86cd799439011' },
+                region_id: { type: 'number', example: 14 },
+                authorId: { type: 'string', example: '507f1f77bcf86cd799439012' },
+                memberId: { type: 'array', items: { type: 'string' }, example: [] },
+                title: { type: 'string', example: '제주도 3박 4일 여행' },
+                description: { type: 'string', example: '제주도에서 함께 여행할 동행을 구합니다!' },
+                schedule: {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            title: { type: 'string', example: '첫째 날 - 제주도 도착' },
+                            description: { type: 'string', example: '제주도 공항에서 만나서 호텔 체크인' },
+                            date: { type: 'string', example: '2025-01-21' }
+                        }
+                    }
+                },
+                startDate: { type: 'string', example: '2025-01-21T00:00:00.000Z' },
+                endDate: { type: 'string', example: '2025-01-24T00:00:00.000Z' },
+                maxPerson: { type: 'number', example: 4 },
+
+                likedUserId: { type: 'array', items: { type: 'string' }, example: [] },
+                tripStyle: { type: 'array', items: { type: 'string' }, example: ['자연', '맛집', '문화'] },
+                createdAt: { type: 'string', example: '2025-01-15T10:30:00.000Z' },
+                updatedAt: { type: 'string', example: '2025-01-15T10:30:00.000Z' }
+            }
+        }
+    })
+    @ApiResponse({
+        status: 400,
+        description: '잘못된 요청 데이터',
+        schema: {
+            type: 'object',
+            properties: {
+                message: { type: 'string', example: 'Validation failed' },
+                errors: { 
+                    type: 'array', 
+                    items: { type: 'string' }, 
+                    example: ['region_id must be a number', 'title should not be empty'] 
+                }
+            }
+        }
+    })
+    @ApiResponse({
+        status: 401,
+        description: '인증 실패',
+        schema: CommonResponses.unauthorized
+    })
+    @UseGuards(JwtAuthGuard)
+    @Post()
     async create(@CurrentUser() userId: string, @Body() postCreateDto: PostCreateDto) : Promise<PostSchema> {
         return this.postService.createPost(userId, postCreateDto);
     }
 
     @ApiOperation({
-        summary:'게시글 수정',
-        description: '기존 게시글의 내용을 수정합니다. 작성자만 수정할 수 있습니다.'
+        summary:'동행 게시글 수정',
+        description: '기존 동행 게시글의 내용을 수정합니다. 작성자만 수정할 수 있습니다.'
     })
     @ApiParam({
         name:'id', 
@@ -235,15 +359,60 @@ export class PostController {
         schema: {
             type: 'object',
             properties: {
-                title: { type: 'string', example: '수정된 제목', description: '게시글 제목' },
-                content: { type: 'string', example: '수정된 내용...', description: '게시글 내용' },
+                region_id: { 
+                    type: 'number', 
+                    example: 14, 
+                    description: '지역 ID (0: 경기도, 1: 강원도, 2: 충청북도, 3: 충청남도, 4: 경상북도, 5: 경상남도, 6: 전라북도, 7: 전라남도, 8: 제주도, 9: 광주광역시, 10: 대구광역시, 11: 대전광역시, 12: 부산광역시, 13: 울산광역시, 14: 서울특별시)' 
+                },
+                title: { 
+                    type: 'string', 
+                    example: '수정된 제목', 
+                    description: '게시글 제목' 
+                },
+                description: { 
+                    type: 'string', 
+                    example: '수정된 설명', 
+                    description: '게시글 설명' 
+                },
                 schedule: {
-                    type: 'object',
-                    properties: {
-                        startDate: { type: 'string', example: '2024-01-01' },
-                        endDate: { type: 'string', example: '2024-01-03' }
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            title: { type: 'string', example: '수정된 일정 제목', description: '일정 제목' },
+                            description: { type: 'string', example: '수정된 일정 설명', description: '일정 설명' },
+                            date: { type: 'string', example: '2025-01-21', description: '일정 날짜' }
+                        }
                     },
-                    description: '여행 일정'
+                    description: '여행 일정 목록'
+                },
+                startDate: { 
+                    type: 'string', 
+                    example: '2025-01-21', 
+                    description: '여행 시작 날짜 (YYYY-MM-DD 형식)' 
+                },
+                endDate: { 
+                    type: 'string', 
+                    example: '2025-01-24', 
+                    description: '여행 종료 날짜 (YYYY-MM-DD 형식)' 
+                },
+                maxPerson: { 
+                    type: 'number', 
+                    example: 4, 
+                    description: '모집 인원 수' 
+                },
+
+                likedUserId: { 
+                    type: 'array', 
+                    items: { type: 'string' }, 
+                    example: [], 
+                    description: '좋아요를 누른 사용자 ID 목록' 
+                },
+                tripStyle: { 
+                    type: 'array', 
+                    items: { type: 'string' }, 
+                    example: ['자연', '맛집', '문화'], 
+                    description: '여행 스타일 (최대 3개)' 
                 }
             }
         }

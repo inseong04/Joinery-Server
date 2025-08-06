@@ -8,7 +8,6 @@ import * as mongoose from 'mongoose';
 import { JwtModule } from '@nestjs/jwt';
 import { PostModule } from './post/post.module';
 import { UserModule } from './user/user.module';
-import { UploadModule } from './upload/upload.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -19,7 +18,6 @@ import { UploadModule } from './upload/upload.module';
     AuthModule,
     PostModule,
     UserModule,
-    UploadModule
   ],
   controllers: [AppController],
   providers: [AppService],

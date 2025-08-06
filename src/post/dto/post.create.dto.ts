@@ -31,11 +31,12 @@ export class PostCreateDto{
     
         @ApiProperty({description: '하트(찜) 한계 수 - 모집인원이라고 볼수있음.'})
         @IsNumber()
-        limitedHeart:number;
+        maxPerson:number;
     
         @ApiProperty({description:'하트(찜) 수'})
+        @IsOptional()
         @IsNumber()
-        heart:number;
+        currentPerson:number;
         
         @ApiProperty({description:'하트누른 사람 id 담는 배열'})
         @IsOptional()

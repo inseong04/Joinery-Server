@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Param, Patch, UseGuards, Body } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Patch, UseGuards, Body, Post, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags, ApiBody, ApiOkResponse, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guard/auth.guard';
@@ -9,7 +9,9 @@ import { CommonResponses, UserResponse } from '../swagger/responses';
 @ApiTags('User')
 @Controller('user')
 export class UserController {
-    constructor(private readonly userService: UserService){}
+    constructor(
+        private readonly userService: UserService,
+    ){}
 
     @ApiOperation({
         summary:'유저 정보 수정',
@@ -230,4 +232,5 @@ export class UserController {
     async deleteInterestRegion(@CurrentUser() id:string, @Body() deleteInterestRegion: number){
         return this.userService.deleteInterestRegion(id, deleteInterestRegion);
     }
+
 }

@@ -38,11 +38,11 @@ export class PostSchema {
 
     @ApiProperty({description: '하트(찜) 한계 수 - 모집인원이라고 볼수있음.'})
     @Prop()
-    limitedHeart:number;
+    maxPerson:number;
 
     @ApiProperty({description:'하트(찜) 수'})
     @Prop()
-    heart:number;
+    currentPerson:number;
     
     @ApiProperty({description:'하트누른 사람 id 담는 배열'})
     @Prop({type:[String]})

@@ -85,8 +85,8 @@ export class UserService {
             const author = await this.verificationModel.findById(post?.authorId).select('nickname').lean();
             wrotePost.startDate = post?.startDate ? DateUtils.formatDate(post.startDate) : null;
             wrotePost.endDate = post?.endDate ? DateUtils.formatDate(post.endDate) : null;
-            wrotePost.limitedHeart = post?.limitedHeart ?? 0;
-            wrotePost.heart = post?.heart ?? 404;
+            wrotePost.limitedHeart = post?.maxPerson ?? 0;
+            wrotePost.heart = post?.currentPerson ?? 404;
             const now = new Date();
             wrotePost.isEnded = (now >= post!.endDate) ? true : false;
             if (wrotePost.isEnded)
