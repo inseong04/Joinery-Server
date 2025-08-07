@@ -164,9 +164,9 @@ export class UserController {
         description: '사용자를 찾을 수 없음',
         schema: CommonResponses.notFound
     })
-    @Get('/:id')
-    async getUser(@Param('id') id:string){
-        return this.userService.getUser(id);
+    @Get('/:username')
+    async getUser(@Param('username') username:string){
+        return this.userService.getUser(username);
     }
 
     @ApiOperation({

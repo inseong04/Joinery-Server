@@ -18,12 +18,14 @@ export class UserService {
         @InjectModel('User') private verificationModel: Model<Verification & Document>
     ){}
 
-    async getUser(id:string){
+    async getUser(username:string){
         // ObjectId 유효성 검사
-        if (!mongoose.Types.ObjectId.isValid(id)) {
+        if (!mongoose.Types.ObjectId.isValid(username)) {
             return null;
         }
-        const user = await this.verificationModel.findById(id);
+
+
+        const user = await this.verificationModel.find({username: username})
         if (!user) return null;
         return user;
     }
