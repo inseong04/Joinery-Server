@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { Verification } from 'src/auth/schema/verification.schema';
@@ -19,14 +19,8 @@ export class UserService {
     ){}
 
     async getUser(username:string){
-        // ObjectId 유효성 검사
-        if (!mongoose.Types.ObjectId.isValid(username)) {
-            return null;
-        }
-
-
-        const user = await this.verificationModel.find({username: username})
-        if (!user) return null;
+        const user = await this.verificationModel.findOne({username: username})
+        if (!user) throw new NotFoundException();
         return user;
     }
 
