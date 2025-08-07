@@ -105,6 +105,29 @@ return result;
         } as unknown as DetailPost;
     }
 
+    async getPostNoToken(id:string){
+        const post = await this.PostModel.findById(id).lean();
+
+        if (!post) throw new NotFoundException();
+
+        const authorName = await this.verificationModel.findById(post.authorId).select('nickname').lean();
+        const members: string[] = await Promise.all(
+            post.memberId.map(async id => {
+                const user = await this.verificationModel.findById(id).select('nickname').lean();
+                return user?.nickname ?? 'Unknown';
+            })
+        );
+
+        // startDate, endDate를 'YYYY-MM-DD HH' string로 변환
+        return {
+            ...post,
+            startDate: this.formatDateHour(post.startDate),
+            endDate: this.formatDateHour(post.endDate),
+            authorName: authorName!.nickname,
+            membersName: members
+        } as unknown as DetailPost;    
+    }
+
     async updateLike(id: string, userId: string){
         await this.PostModel.findByIdAndUpdate(id, {$addToSet: {likedUserId: userId}},{new: true});
         await this.verificationModel.findByIdAndUpdate(userId, {$addToSet: {likePostId: id}}, {new:true});
