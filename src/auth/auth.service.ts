@@ -7,6 +7,7 @@ import DateUtils from 'src/post/utils/date.utill';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { SignInDto } from './dto/signin.dto';
+import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class AuthService {
     constructor(
@@ -36,6 +37,7 @@ export class AuthService {
         signUpDto.likePostId= [];
         signUpDto.joinPostId = [];
         signUpDto.interestRegion= [];
+        signUpDto.profileImageUrl = process.env.DEFAULT_PROFILE_IMAGE_URL!;
         const createUser = new this.verificationModel(signUpDto);
         return createUser.save();
     }

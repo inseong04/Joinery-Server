@@ -113,5 +113,10 @@ export class UserService {
         return await this.verificationModel.findById(id);
     }
 
+    async uploadImage(id: string, imageUrl: string) {
+        await this.verificationModel.findByIdAndUpdate(id, {profileImageUrl: imageUrl});
+        return { message: 'success', url: imageUrl};
+    }
+
 
 }

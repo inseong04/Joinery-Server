@@ -5,12 +5,16 @@ import { JwtAuthGuard } from 'src/auth/guard/auth.guard';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { UserUpdateDto } from './dto/user.update.dto';
 import { CommonResponses, UserResponse } from '../swagger/responses';
+import { UploadService } from 'src/upload/upload.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ImageValidationPipe } from 'src/upload/image-validation.pipe';
 
 @ApiTags('User')
 @Controller('user')
 export class UserController {
     constructor(
         private readonly userService: UserService,
+        private readonly uploadService: UploadService,
     ){}
 
     @ApiOperation({
@@ -231,6 +235,15 @@ export class UserController {
     @Delete('/interest-region')
     async deleteInterestRegion(@CurrentUser() id:string, @Body() deleteInterestRegion: number){
         return this.userService.deleteInterestRegion(id, deleteInterestRegion);
+    }
+
+    @ApiOperation({description:'프로필 이미지 업로드 TEST'})
+    @UseGuards(JwtAuthGuard)
+    @Patch('/update-image')
+    @UseInterceptors(FileInterceptor('file'))
+    async uploadImage(@CurrentUser() id: string, @UploadedFile(ImageValidationPipe) file: Express.MulterS3.File) {
+        const imageUrl = this.uploadService.uploadFile(file);
+        return this.userService.uploadImage(id, imageUrl);
     }
 
 }
