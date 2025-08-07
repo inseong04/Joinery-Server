@@ -147,7 +147,7 @@ export class UserController {
 
     @ApiOperation({
         summary:'특정 사용자 정보 조회',
-        description: '사용자 ID로 특정 사용자의 정보를 조회합니다.'
+        description: '사용자 ID(username)로 특정 사용자의 정보를 조회합니다.'
     })
     @ApiParam({
         name:'id', 
