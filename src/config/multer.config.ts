@@ -2,14 +2,18 @@ import { S3Client } from "@aws-sdk/client-s3";
 import { ConfigService } from "@nestjs/config";
 import * as multerS3 from 'multer-s3';
 
-export const multerOptionsFactory = (configService: ConfigService) => {
-    const s3 = new S3Client({
+export const createS3Client = (configService: ConfigService): S3Client => {
+    return new S3Client({
         region: configService.get('AWS_REGION')!,
         credentials: {
             accessKeyId: configService.get('AWS_ACCESS_KEY_ID')!,
             secretAccessKey: configService.get('AWS_SECRET_ACCESS_KEY')!,
         },
     });
+};
+
+export const multerOptionsFactory = (configService: ConfigService) => {
+    const s3 = createS3Client(configService);
     
     return {
         storage: multerS3({

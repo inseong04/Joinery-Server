@@ -10,12 +10,15 @@ import DateUtils from 'src/post/utils/date.utill';
 import { UserPostModel } from './model/user.post.model';
 import { PostGetDto } from 'src/post/dto/post.get.dto';
 import { UserWrotePostModel } from './model/user.wrote.post.model';
+import { UploadService } from 'src/upload/upload.service';
+import { extractS3KeyFromUrl } from 'src/post/utils/extractS3MetFromUrl';
 
 @Injectable()
 export class UserService {
     constructor(
         @InjectModel('Post') private postModel:Model<PostSchema>,
-        @InjectModel('User') private verificationModel: Model<Verification & Document>
+        @InjectModel('User') private verificationModel: Model<Verification & Document>,
+        private uploadService: UploadService
     ){}
 
     async getUser(id:string){
@@ -33,10 +36,10 @@ export class UserService {
         if (imageUrl == undefined) {
             userUpdateDto.profileImageUrl = undefined;
         } else {
-            userUpdateDto.profileImageUrl = imageUrl; // 기본이미지가 아닐떄는 기존 이미지파일도 지워야함!!
+            const existPost = await this.verificationModel.findById(id).select('profileImageUrl');
+            this.uploadService.deleteFile(extractS3KeyFromUrl(existPost?.profileImageUrl!)!);
+            userUpdateDto.profileImageUrl = imageUrl;
         }
-
-
 
         const cleanData = Object.fromEntries(
             Object.entries(userUpdateDto).filter(([_, v]) => v !== undefined)
