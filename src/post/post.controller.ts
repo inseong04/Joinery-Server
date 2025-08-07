@@ -11,6 +11,7 @@ import { isValidObjectId } from 'mongoose';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { CommonResponses, PostDetailResponse, PopularRegionsResponse } from '../swagger/responses';
 import { PreviewPostModel } from './model/preview.post.model';
+import { OptionalJwtAuthGuard } from 'src/auth/guard/optional-auth.guard';
 
 @ApiTags('Post')
 @Controller('post')
@@ -19,8 +20,8 @@ export class PostController {
 
 
     @ApiOperation({
-        summary:'특정 게시글 조회 (토큰 포함)',
-        description: '게시글 ID로 특정 게시글의 상세 정보를 조회합니다. 좋아요 여부도 함께 반환됩니다.'
+        summary:'특정 게시글 조회',
+        description: '게시글 ID로 특정 게시글의 상세 정보를 조회합니다. 좋아요 여부도 함께 반환됩니다.만약 토큰이 없으면 좋야요 여부는 반환되지않습니다.'
     })
     @ApiParam({
         name:'id',
@@ -43,42 +44,13 @@ export class PostController {
         schema: CommonResponses.notFound
     })
     @ApiBearerAuth('access-token')
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(OptionalJwtAuthGuard)
     @Get('/:id')
     async getOne(@Param('id') id:string, @CurrentUser() userId: string) : Promise<DetailPost | null>{
         if (!isValidObjectId(id)) {
             return null;
         }
         return this.postService.getPost(id, userId);
-    }
-
-        @ApiOperation({
-        summary:'특정 게시글 조회 (토큰 제외)',
-        description: '게시글 ID로 특정 게시글의 상세 정보를 조회합니다. 좋아요 여부도 함께 반환됩니다.'
-    })
-    @ApiParam({
-        name:'id',
-        type:'string',
-        description: '조회할 게시글의 ID',
-        example: '507f1f77bcf86cd799439011'
-    })
-    @ApiOkResponse({
-        description: '게시글 조회 성공',
-        schema: PostDetailResponse
-    })
-    @ApiResponse({
-        status: 404,
-        description: '게시글을 찾을 수 없음',
-        schema: CommonResponses.notFound
-    })
-    @ApiBearerAuth('access-token')
-    @UseGuards(JwtAuthGuard)
-    @Get('/no-token/:id')
-    async getOneNoToken(@Param('id') id:string) : Promise<DetailPost | null>{
-        if (!isValidObjectId(id)) {
-            return null;
-        }
-        return this.postService.getPostNoToken(id);
     }
 
     @ApiOperation({
