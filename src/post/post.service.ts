@@ -10,6 +10,7 @@ import { isHeartDto } from './dto/isHeart.dto';
 import { HeartType } from 'src/constants/user.constants';
 import { PreviewPostModel } from './model/preview.post.model';
 import DateUtils from 'src/post/utils/date.utill';
+import { MembersInformationModel } from './model/members-information.model';
 
 @Injectable()
 export class PostService {
@@ -86,21 +87,24 @@ return result;
             }
         } 
 
-        const authorName = await this.verificationModel.findById(post.authorId).select('nickname').lean();
-        const members: string[] = await Promise.all(
+        const author = await this.verificationModel.findById(post.authorId).select('nickname username').lean();
+        const members: MembersInformationModel[] = await Promise.all(
             post.memberId.map(async id => {
-                const user = await this.verificationModel.findById(id).select('nickname').lean();
-                return user?.nickname ?? 'Unknown';
+                const user = await this.verificationModel.findById(id).select('nickname username').lean();
+                const someMember = new MembersInformationModel;
+                someMember.nickname = user?.nickname ?? 'Unknown';
+                someMember.username = user?.username ?? 'Unknown';
+                return someMember;
             })
         );
-
         // startDate, endDate를 'YYYY-MM-DD HH' string로 변환
         return {
             ...post,
             startDate: this.formatDateHour(post.startDate),
             endDate: this.formatDateHour(post.endDate),
             heartType: heartType,
-            authorName: authorName!.nickname,
+            authorNickname: author!.nickname,
+            authorUsername: author!.username,
             membersName: members
         } as unknown as DetailPost;
     }

@@ -28,7 +28,16 @@ export class UserService {
         return user;
     }
 
-    async updateUser(id:string, userUpdateDto: UserUpdateDto){
+    async updateUser(id:string, userUpdateDto: UserUpdateDto, imageUrl: string){
+        
+        if (imageUrl == undefined) {
+            userUpdateDto.profileImageUrl = undefined;
+        } else {
+            userUpdateDto.profileImageUrl = imageUrl; // 기본이미지가 아닐떄는 기존 이미지파일도 지워야함!!
+        }
+
+
+
         const cleanData = Object.fromEntries(
             Object.entries(userUpdateDto).filter(([_, v]) => v !== undefined)
         );
@@ -38,7 +47,6 @@ export class UserService {
             {new: true}
         );
     }
-
     async getApplicationPost(id: string){
         const user = await this.verificationModel.findById(id).select('likePostId');
         const likedPostIdList = (user as any)?.likePostId as string[] | undefined;

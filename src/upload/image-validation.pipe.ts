@@ -21,7 +21,8 @@ export class ImageValidationPipe extends ParseFilePipe {
         super({
             validators: [
                 new ImageFileValidator(),
-            ]
+            ],
+            fileIsRequired:false,
         })
     }
 }

@@ -38,6 +38,7 @@ export class AuthService {
         signUpDto.joinPostId = [];
         signUpDto.interestRegion= [];
         signUpDto.profileImageUrl = process.env.DEFAULT_PROFILE_IMAGE_URL!;
+        
         const createUser = new this.verificationModel(signUpDto);
         return createUser.save();
     }

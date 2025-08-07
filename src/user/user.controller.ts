@@ -36,9 +36,12 @@ export class UserController {
         schema: CommonResponses.unauthorized
     })
     @UseGuards(JwtAuthGuard)
+    @UseInterceptors(FileInterceptor('file'))
     @Patch('')
-    async updateUser(@CurrentUser() id: string, @Body() userUpdateDto: UserUpdateDto){
-        return await this.userService.updateUser(id, userUpdateDto);
+    async updateUser(@CurrentUser() id: string, @Body() userUpdateDto: UserUpdateDto, 
+    @UploadedFile(ImageValidationPipe) file: Express.MulterS3.File){
+        const imageUrl = this.uploadService.uploadFile(file);
+        return await this.userService.updateUser(id, userUpdateDto, imageUrl);
     }
 
     @ApiOperation({
