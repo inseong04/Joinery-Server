@@ -126,33 +126,54 @@ export const UserResponse = {
 export const PostDetailResponse = {
   type: 'object',
   properties: {
-    id: { type: 'string', example: '507f1f77bcf86cd799439011' },
+    _id: { type: 'string', example: '507f1f77bcf86cd799439011' },
     title: { type: 'string', example: '서울 여행 후기' },
-    content: { type: 'string', example: '서울에서 즐거운 시간을 보냈습니다...' },
+    description: { type: 'string', example: '서울에서 즐거운 시간을 보냈습니다...' },
+    region_id: { type: 'number', example: 14 },
     author: { 
       type: 'object',
       properties: {
-        id: { type: 'string', example: '507f1f77bcf86cd799439012' },
-        nickname: { type: 'string', example: '여행러버' }
+        nickname: { type: 'string', example: '여행러버' },
+        username: { type: 'string', example: 'user123' },
+        profileImageUrl: { type: 'string', example: 'uploads/1754546984873-profile-image.png' }
       }
     },
-    region: { 
-      type: 'object',
-      properties: {
-        id: { type: 'number', example: 1 },
-        name: { type: 'string', example: '서울' }
+    members: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          nickname: { type: 'string', example: '여행러버' },
+          username: { type: 'string', example: 'user123' },
+          profileImageUrl: { type: 'string', example: 'uploads/1754546984873-profile-image.png' }
+        }
       }
     },
     schedule: {
-      type: 'object',
-      properties: {
-        startDate: { type: 'string', example: '2024-01-01' },
-        endDate: { type: 'string', example: '2024-01-03' }
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          title: { type: 'string', example: '첫째 날 - 서울 도착' },
+          description: { type: 'string', example: '서울 공항에서 만나서 호텔 체크인' },
+          date: { type: 'string', example: '2024-01-01' }
+        }
       }
     },
-    isLiked: { type: 'boolean', example: true },
-    likeCount: { type: 'number', example: 5 },
-    createdAt: { type: 'string', example: '2024-01-01 10' }
+    startDate: { type: 'string', example: '2024-01-01 10' },
+    endDate: { type: 'string', example: '2024-01-03 18' },
+    MaxPerson: { type: 'number', example: 5 },
+    currentPerson: { type: 'number', example: 3 },
+    tripStyle: { 
+      type: 'array', 
+      items: { type: 'string' },
+      example: ['자연', '문화', '맛집']
+    },
+    heartType: { 
+      type: 'string', 
+      enum: ['NoOne', 'UserOnly', 'Both'],
+      example: 'UserOnly'
+    }
   }
 };
 
@@ -202,5 +223,38 @@ export const SignUpConflictResponse = {
     message: { type: 'string', example: '이미 존재하는 아이디입니다.' },
     error: { type: 'string', example: 'Conflict' },
     statusCode: { type: 'number', example: 409 }
+  }
+};
+
+// 게시글 목록 응답 스키마
+export const PostListResponse = {
+  type: 'array',
+  items: {
+    type: 'object',
+    properties: {
+      _id: { type: 'string', example: '507f1f77bcf86cd799439011' },
+      title: { type: 'string', example: '서울 여행 후기' },
+      username: { type: 'string', example: '여행러버' },
+      startDate: { type: 'string', example: '2024-01-01' },
+      endDate: { type: 'string', example: '2024-01-03' },
+      currentPerson: { type: 'number', example: 3 },
+      maxPerson: { type: 'number', example: 5 }
+    }
+  }
+};
+
+// 좋아요 응답 스키마
+export const LikeResponse = {
+  type: 'object',
+  properties: {
+    message: { type: 'string', example: 'success for updateLike' }
+  }
+};
+
+// 게시글 삭제 응답 스키마
+export const DeletePostResponse = {
+  type: 'object',
+  properties: {
+    message: { type: 'string', example: 'success' }
   }
 }; 

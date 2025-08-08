@@ -18,11 +18,23 @@ export class UserController {
     ){}
 
 
-    @ApiOperation({summary:'프로필 가져오기'})
+    @ApiOperation({
+        summary: '내 프로필 조회',
+        description: '현재 로그인한 사용자의 프로필 정보를 조회합니다.'
+    })
     @ApiBearerAuth('access-token')
+    @ApiOkResponse({
+        description: '프로필 조회 성공',
+        schema: UserResponse
+    })
+    @ApiResponse({
+        status: 401,
+        description: '인증 실패',
+        schema: CommonResponses.unauthorized
+    })
     @UseGuards(JwtAuthGuard)
     @Get('')
-    async getUserById(@CurrentUser() id: string){
+    async getMyProfile(@CurrentUser() id: string){
         return this.userService.getUserById(id);
     }
 
@@ -209,9 +221,9 @@ export class UserController {
         description: '사용자를 찾을 수 없음',
         schema: CommonResponses.notFound
     })
-    @Get('/:username')
-    async getUser(@Param('username') username:string){
-        return this.userService.getUser(username);
+    @Get('/:id')
+    async getUser(@Param('id') id:string){
+        return this.userService.getUser(id);
     }
 
     @ApiOperation({
@@ -279,7 +291,7 @@ export class UserController {
     }
 
     @ApiOperation({
-        summary: '프로필 이미지 업로드 TEST',
+        summary: '프로필 이미지 업로드',
         description: '현재 로그인한 사용자의 프로필 이미지를 업로드합니다. PNG, JPEG, JPG 형식의 이미지 파일을 지원합니다.'
     })
     @ApiBearerAuth('access-token')
