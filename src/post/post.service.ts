@@ -11,6 +11,7 @@ import { HeartType } from 'src/constants/user.constants';
 import { PreviewPostModel } from './model/preview.post.model';
 import DateUtils from 'src/utils/date.utill';
 import { MembersInformationModel } from './model/members-information.model';
+import { AuthorModel } from './model/author.model';
 
 @Injectable()
 export class PostService {
@@ -21,15 +22,20 @@ export class PostService {
 
     async getRegionPost(regionId:number, findRegionDto: FindRegionDto){
     let result: PreviewPostModel[] = [];
+    //시작날짜 끝나는날짜 미입력시
     if (findRegionDto.startDate == null && findRegionDto.endDate == null) {
             const posts = await this.PostModel.find({region_id: regionId}).select('title startDate endDate limitedHeart heart createdAt authorId').lean();
             const postList: PreviewPostModel[] = await Promise.all(posts.map(async item => {
-                const user = await this.verificationModel.findById(item.authorId).select('nickname').lean();
+                const user = await this.verificationModel.findById(item.authorId).select('nickname username profileImageUrl').lean();
+                const author : AuthorModel = new AuthorModel();
+                author.nickname = user?.nickname ?? 'Unknown';
+                author.username = user?.username ?? 'Unknown';
+                author.profileImageUrl = user?.profileImageUrl ?? process.env.DEFAULT_PROFILE_IMAGE_URL!;
                 console.log(item);
                 return {
                     _id: item._id.toString(),
                     title: item.title,
-                    username: user?.nickname ?? 'Unknown',
+                    author: author,
                     startDate: DateUtils.formatDate(item.startDate),
                     endDate: DateUtils.formatDate(item.endDate),
                     currentPerson: item.currentPerson,
@@ -44,11 +50,12 @@ export class PostService {
         const filterEndDate = new Date(findRegionDto.endDate);
         const posts = await this.PostModel.find({region_id:regionId, startDate:{$gte: filterStartDate}, endDate:{$lte:filterEndDate} });
         const postList: PreviewPostModel[] = await Promise.all(posts.map(async item => {
-            const user = await this.verificationModel.findById(item.authorId).select('nickname').lean();
-            return {
+                const user = await this.verificationModel.findById(item.authorId).select('nickname username profileImageUrl').lean();
+                const author : AuthorModel = new AuthorModel();            
+                return {
                 _id:item._id.toString(),
                 title: item.title,
-                username: user?.nickname ?? 'Unknown',
+                author: author,
                 startDate: DateUtils.formatDate(item.startDate),
                 endDate: DateUtils.formatDate(item.endDate),
                 currentPerson: item.currentPerson,
@@ -73,16 +80,24 @@ return result;
         const post = await this.PostModel.findById(id).lean();
         if (!post) throw new NotFoundException();
 
-        const author = await this.verificationModel.findById(post.authorId).select('nickname username').lean();
+        const authorInformation = await this.verificationModel.findById(post.authorId).select('nickname username profileImageUrl').lean();
+        const author: AuthorModel = new AuthorModel();
+        author.nickname = authorInformation?.nickname ??'Unknown';
+        author.username = authorInformation?.username ?? 'Unknown';
+        author.profileImageUrl = authorInformation?.profileImageUrl ?? process.env.DEFAULT_PROFILE_IMAGE_URL!;
+
         const members: MembersInformationModel[] = await Promise.all(
             post.memberId.map(async id => {
-                const user = await this.verificationModel.findById(id).select('nickname username').lean();
+                const user = await this.verificationModel.findById(id).select('nickname username profileImageUrl').lean();
                 const someMember = new MembersInformationModel;
                 someMember.nickname = user?.nickname ?? 'Unknown';
                 someMember.username = user?.username ?? 'Unknown';
+                someMember.profileImageUrl = user?.profileImageUrl ?? process.env.DEFAULT_PROFILE_IMAGE_URL!;
+
                 return someMember;
             })
         );
+
         // 토큰 있을시
         if (userId != undefined) {
             const user = await this.verificationModel.findById(userId).select('')
@@ -99,23 +114,29 @@ return result;
                 }
             }
             // startDate, endDate를 'YYYY-MM-DD HH' string로 변환
+
+            const {authorId, memberId, likedUserId, ...rest} = post;
+            
             return {
-                ...post,
+                ...rest,
                 startDate: this.formatDateHour(post.startDate),
                 endDate: this.formatDateHour(post.endDate),
                 heartType: heartType,
-                authorName: authorName!.nickname,
-                membersName: members
+                author: author,
+                members: members,
+                
             } as unknown as DetailPost;
             
         } else { // 토큰 없을시
+            const {authorId, memberId, likedUserId, ...rest} = post;
+
             // startDate, endDate를 'YYYY-MM-DD HH' string로 변환
             return {
-                ...post,
+                ...rest,
                 startDate: this.formatDateHour(post.startDate),
                 endDate: this.formatDateHour(post.endDate),
-                authorName: authorName!.nickname,
-                membersName: members
+                author: author,
+                members: members
             } as unknown as DetailPost;
         }
     }

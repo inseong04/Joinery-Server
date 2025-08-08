@@ -23,6 +23,7 @@ export class UserService {
     async getUser(username:string){
         const user = await this.verificationModel.findOne({username: username})
         if (!user) throw new NotFoundException();
+        
         // birthDate를 string으로 변환
         const userResponse = user.toObject();
         if (userResponse.birthDate) {
@@ -34,9 +35,15 @@ export class UserService {
 
     async getUserById(id:string) {
         const user = await this.verificationModel.findById(id);
-        
         if (!user) throw new NotFoundException();
-        return user;
+
+        // birthDate를 string으로 변환
+        const userResponse = user.toObject();
+        if (userResponse.birthDate) {
+            userResponse.birthDate = DateUtils.formatDate(userResponse.birthDate) as any;
+        }
+        
+        return userResponse;
 
     }
 
