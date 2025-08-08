@@ -124,7 +124,7 @@ export class UserService {
         const wrotePosts: UserWrotePostModel[] = [];
         for (const item of wrotePostIdList) {
             const post = await this.postModel.findById(item);
-            if (post == null) throw new NotFoundException();
+            if (post == null) continue; // 삭제된 게시글은 건너뛰기
             const wrotePost: UserWrotePostModel = new UserWrotePostModel();
             wrotePost._id = post?._id ? post._id.toString() : null;
             wrotePost.region_id = post?.region_id ? post.region_id : null;

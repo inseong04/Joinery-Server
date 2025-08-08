@@ -219,8 +219,9 @@ return result;
         return this.getPost(id, userId);
     }
 
-    async deletePost(id: string) {
+    async deletePost(id: string, userId: string) {
         await this.PostModel.findByIdAndDelete(id);
+        await this.verificationModel.findByIdAndUpdate(userId, {$pull: {wrotePost: id}});
         return {message:"success"};
     }
 }

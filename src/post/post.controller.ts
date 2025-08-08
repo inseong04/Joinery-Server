@@ -415,7 +415,7 @@ export class PostController {
     @Delete('/:id')
     async deletePost(@Param('id') id: string, @CurrentUser() userId: string) {
         // TODO: 권한 체크 추가 (작성자만 삭제 가능)
-        return this.postService.deletePost(id);
+        return this.postService.deletePost(id, userId);
     }
 
     @ApiOperation({

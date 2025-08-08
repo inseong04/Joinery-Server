@@ -156,13 +156,13 @@ export const PostDetailResponse = {
         properties: {
           title: { type: 'string', example: '첫째 날 - 서울 도착' },
           description: { type: 'string', example: '서울 공항에서 만나서 호텔 체크인' },
-          date: { type: 'string', example: '2024-01-01' }
+          date: { type: 'string', example: '2024-12-31T15:00:00.000Z' }
         }
       }
     },
     startDate: { type: 'string', example: '2024-01-01 10' },
     endDate: { type: 'string', example: '2024-01-03 18' },
-    MaxPerson: { type: 'number', example: 5 },
+    maxPerson: { type: 'number', example: 5 },
     currentPerson: { type: 'number', example: 3 },
     tripStyle: { 
       type: 'array', 
@@ -170,9 +170,10 @@ export const PostDetailResponse = {
       example: ['자연', '문화', '맛집']
     },
     heartType: { 
-      type: 'string', 
-      enum: ['NoOne', 'UserOnly', 'Both'],
-      example: 'UserOnly'
+      type: 'number', 
+      enum: [0, 1, 2],
+      example: 0,
+      description: '0: NoOne, 1: UserOnly, 2: Both'
     }
   }
 };
@@ -234,11 +235,16 @@ export const PostListResponse = {
     properties: {
       _id: { type: 'string', example: '507f1f77bcf86cd799439011' },
       title: { type: 'string', example: '서울 여행 후기' },
-      username: { type: 'string', example: '여행러버' },
-      startDate: { type: 'string', example: '2024-01-01' },
-      endDate: { type: 'string', example: '2024-01-03' },
-      currentPerson: { type: 'number', example: 3 },
-      maxPerson: { type: 'number', example: 5 }
+      author: {
+        type: 'object',
+        properties: {
+          nickname: { type: 'string', example: '테스트유저' },
+          username: { type: 'string', example: 'testuser' },
+          profileImageUrl: { type: 'string', example: 'uploads/1754546984873-profile-image.png' }
+        }
+      },
+      startDate: { type: 'string', example: '2025-01-01' },
+      endDate: { type: 'string', example: '2025-01-03' }
     }
   }
 };
