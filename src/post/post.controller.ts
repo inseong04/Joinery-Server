@@ -9,7 +9,7 @@ import { RegionPost } from './model/region.post.model';
 import { FindRegionDto } from './dto/find.region.dto';
 import { isValidObjectId } from 'mongoose';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { CommonResponses, PostDetailResponse, PopularRegionsResponse } from '../swagger/responses';
+import { CommonResponses, PostDetailResponse, PopularRegionsResponse, PostListResponse, LikeResponse, DeletePostResponse } from '../swagger/responses';
 import { PreviewPostModel } from './model/preview.post.model';
 import { OptionalJwtAuthGuard } from 'src/auth/guard/optional-auth.guard';
 
@@ -66,7 +66,7 @@ export class PostController {
     @ApiBearerAuth('access-token')
     @ApiOkResponse({
         description: '좋아요 업데이트 성공',
-        schema: PostDetailResponse
+        schema: LikeResponse
     })
     @ApiResponse({
         status: 401,
@@ -97,7 +97,7 @@ export class PostController {
     @ApiBearerAuth('access-token')
     @ApiOkResponse({
         description: '좋아요 삭제 성공',
-        schema: PostDetailResponse
+        schema: LikeResponse
     })
     @ApiResponse({
         status: 401,
@@ -142,80 +142,13 @@ export class PostController {
     })
     @ApiOkResponse({
         description: '지역 게시글 목록 조회 성공',
-        schema: {
-            type: 'array',
-            items: {
-                type: 'object',
-                properties: {
-                    _id: {
-                        type: 'string',
-                        example:'게시글id',
-                        description:'게시글의 _id'
-                    },
-                    title: {
-                        type: 'string',
-                        example: '제주도 여행',
-                        description: '게시글 제목'
-                    },
-                    username: {
-                        type: 'string',
-                        example: '여행자',
-                        description: '작성자 닉네임'
-                    },
-                    startDate: {
-                        type: 'string',
-                        example: '2024-01-01',
-                        description: '여행 시작일'
-                    },
-                    endDate: {
-                        type: 'string',
-                        example: '2024-01-03',
-                        description: '여행 종료일'
-                    },
-                    heart: {
-                        type: 'number',
-                        example: 5,
-                        description: '현재 좋아요 수'
-                    },
-                    limitedHeart: {
-                        type: 'number',
-                        example: 10,
-                        description: '최대 좋아요 수'
-                    }
-                }
-            }
-        }
+        schema: PostListResponse
     })
     @Get('/region/:id')
     async getRegion(@Param('id') regionId : number, @Query() findRegionDto: FindRegionDto): Promise<RegionPost[]>{
         return this.postService.getRegionPost(regionId, findRegionDto) as any;
     }
 
-    @ApiOperation({
-        summary:'게시글 생성',
-        description: '새로운 여행 게시글을 생성합니다. 제목, 내용, 지역, 일정 정보가 필요합니다.'
-    })
-    @ApiBody({
-        type: PostCreateDto,
-        description: '생성할 게시글 정보'
-    })
-    @ApiCreatedResponse({
-        description: '게시글 생성 성공',
-        schema: PostDetailResponse
-    })
-    @ApiResponse({
-        status: 401,
-        description: '인증 실패',
-        schema: CommonResponses.unauthorized
-    })
-    @ApiResponse({
-        status: 400,
-        description: '잘못된 입력 데이터',
-        schema: CommonResponses.validationError
-    })
-    @ApiBearerAuth('access-token')
-    @UseGuards(JwtAuthGuard)
-    @Post('/')
     @ApiOperation({
         summary:'동행 게시글 생성',
         description: '새로운 동행 게시글을 생성합니다. 여행 일정, 모집 인원, 여행 스타일 등을 포함합니다.'
@@ -461,12 +394,7 @@ export class PostController {
     @ApiBearerAuth('access-token')
     @ApiOkResponse({
         description: '게시글 삭제 성공',
-        schema: {
-            type: 'object',
-            properties: {
-                message: { type: 'string', example: 'Post deleted successfully' }
-            }
-        }
+        schema: DeletePostResponse
     })
     @ApiResponse({
         status: 401,
@@ -487,7 +415,7 @@ export class PostController {
     @Delete('/:id')
     async deletePost(@Param('id') id: string, @CurrentUser() userId: string) {
         // TODO: 권한 체크 추가 (작성자만 삭제 가능)
-        return this.postService.deletePost(id);
+        return this.postService.deletePost(id, userId);
     }
 
     @ApiOperation({

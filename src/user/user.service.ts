@@ -23,7 +23,7 @@ export class UserService {
     async getUser(username:string){
         const user = await this.verificationModel.findOne({username: username})
         if (!user) throw new NotFoundException();
-        
+
         // birthDate를 string으로 변환
         const userResponse = user.toObject();
         if (userResponse.birthDate) {
@@ -124,6 +124,7 @@ export class UserService {
         const wrotePosts: UserWrotePostModel[] = [];
         for (const item of wrotePostIdList) {
             const post = await this.postModel.findById(item);
+            if (post == null) continue; // 삭제된 게시글은 건너뛰기
             const wrotePost: UserWrotePostModel = new UserWrotePostModel();
             wrotePost._id = post?._id ? post._id.toString() : null;
             wrotePost.region_id = post?.region_id ? post.region_id : null;
