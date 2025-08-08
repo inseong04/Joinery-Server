@@ -9,7 +9,7 @@ import { Verification } from 'src/auth/schema/verification.schema';
 import { isHeartDto } from './dto/isHeart.dto';
 import { HeartType } from 'src/constants/user.constants';
 import { PreviewPostModel } from './model/preview.post.model';
-import DateUtils from 'src/post/utils/date.utill';
+import DateUtils from 'src/utils/date.utill';
 import { MembersInformationModel } from './model/members-information.model';
 
 @Injectable()
@@ -32,8 +32,8 @@ export class PostService {
                     username: user?.nickname ?? 'Unknown',
                     startDate: DateUtils.formatDate(item.startDate),
                     endDate: DateUtils.formatDate(item.endDate),
-                    heart: item.currentPerson,
-                    limitedHeart: item.maxPerson,
+                    currentPerson: item.currentPerson,
+                    maxPerson: item.maxPerson,
                     
                 };
             }));
@@ -51,8 +51,8 @@ export class PostService {
                 username: user?.nickname ?? 'Unknown',
                 startDate: DateUtils.formatDate(item.startDate),
                 endDate: DateUtils.formatDate(item.endDate),
-                heart: item.currentPerson,
-                limitedHeart: item.maxPerson,
+                currentPerson: item.currentPerson,
+                maxPerson: item.maxPerson,
                 };
             }));    
         result = postList;

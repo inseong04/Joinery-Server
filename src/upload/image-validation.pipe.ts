@@ -1,4 +1,5 @@
 import { Injectable, ParseFilePipe, FileValidator } from "@nestjs/common";
+import { FILE_CONSTANTS } from "src/constants/file.constants";
 
 class ImageFileValidator extends FileValidator {
     constructor() {
@@ -6,12 +7,11 @@ class ImageFileValidator extends FileValidator {
     }
 
     isValid(file: any): boolean {
-        const allowedMimeTypes = ['image/png', 'image/jpeg', 'image/jpg'];
-        return allowedMimeTypes.includes(file.mimetype);
+        return FILE_CONSTANTS.ALLOWED_IMAGE_TYPES.includes(file.mimetype);
     }
 
     buildErrorMessage(): string {
-        return '지원하지 않는 파일 형식입니다. PNG, JPEG, JPG 파일만 업로드 가능합니다.';
+        return FILE_CONSTANTS.ERROR_MESSAGES.INVALID_FILE_TYPE;
     }
 }
 

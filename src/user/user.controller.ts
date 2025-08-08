@@ -19,16 +19,45 @@ export class UserController {
 
     @ApiOperation({
         summary:'유저 정보 수정',
-        description: '현재 로그인한 사용자의 정보를 수정합니다. 닉네임, 자기소개, 여행 스타일을 변경할 수 있습니다.'
+        description: '현재 로그인한 사용자의 정보를 수정합니다. 닉네임, 자기소개, 여행 스타일, 프로필 이미지를 변경할 수 있습니다. 이미지 파일은 PNG, JPEG, JPG 형식을 지원합니다.'
     })
     @ApiBearerAuth('access-token')
     @ApiBody({
-        type: UserUpdateDto,
-        description: '수정할 사용자 정보'
+        description: '수정할 사용자 정보 및 이미지 파일',
+        schema: {
+            type: 'object',
+            properties: {
+                nickname: { type: 'string', description: '닉네임', example: '새로운닉네임' },
+                userDescription: { type: 'string', description: '자기소개', example: '안녕하세요!' },
+                tripStyle: { 
+                    type: 'array', 
+                    items: { type: 'string' },
+                    description: '여행 스타일',
+                    example: ['문화탐방', '자연감상']
+                },
+                file: {
+                    type: 'File',
+                    format: 'binary',
+                    description: '프로필 이미지 파일 (선택사항, PNG, JPEG, JPG)'
+                }
+            }
+        }
     })
     @ApiOkResponse({
         description: '사용자 정보 수정 성공',
         schema: UserResponse
+    })
+    @ApiResponse({
+        status: 400,
+        description: '잘못된 파일 형식',
+        schema: {
+            type: 'object',
+            properties: {
+                message: { type: 'string', example: '지원하지 않는 파일 형식입니다. PNG, JPEG, JPG 파일만 업로드 가능합니다.' },
+                error: { type: 'string', example: 'Bad Request' },
+                statusCode: { type: 'number', example: 400 }
+            }
+        }
     })
     @ApiResponse({
         status: 401,
@@ -39,8 +68,8 @@ export class UserController {
     @UseInterceptors(FileInterceptor('file'))
     @Patch('')
     async updateUser(@CurrentUser() id: string, @Body() userUpdateDto: UserUpdateDto, 
-    @UploadedFile(ImageValidationPipe) file: Express.MulterS3.File){
-        const imageUrl = this.uploadService.uploadFile(file);
+    @UploadedFile(ImageValidationPipe) file?: Express.MulterS3.File){
+        const imageUrl = file ? this.uploadService.uploadFile(file) : undefined;
         return await this.userService.updateUser(id, userUpdateDto, imageUrl);
     }
 
@@ -240,11 +269,58 @@ export class UserController {
         return this.userService.deleteInterestRegion(id, deleteInterestRegion);
     }
 
-    @ApiOperation({description:'프로필 이미지 업로드 TEST'})
+    @ApiOperation({
+        summary: '프로필 이미지 업로드 TEST',
+        description: '현재 로그인한 사용자의 프로필 이미지를 업로드합니다. PNG, JPEG, JPG 형식의 이미지 파일을 지원합니다.'
+    })
+    @ApiBearerAuth('access-token')
+    @ApiBody({
+        description: '업로드할 이미지 파일',
+        schema: {
+            type: 'object',
+            properties: {
+                file: {
+                    type: 'string',
+                    format: 'binary',
+                    description: '이미지 파일 (PNG, JPEG, JPG)'
+                }
+            }
+        }
+    })
+    @ApiOkResponse({
+        description: '프로필 이미지 업로드 성공',
+        schema: {
+            type: 'object',
+            properties: {
+                message: { type: 'string', example: 'success' },
+                url: { type: 'string', example: 'uploads/1754546984873-profile-image.png' }
+            }
+        }
+    })
+    @ApiResponse({
+        status: 400,
+        description: '잘못된 파일 형식',
+        schema: {
+            type: 'object',
+            properties: {
+                message: { type: 'string', example: '지원하지 않는 파일 형식입니다. PNG, JPEG, JPG 파일만 업로드 가능합니다.' },
+                error: { type: 'string', example: 'Bad Request' },
+                statusCode: { type: 'number', example: 400 }
+            }
+        }
+    })
+    @ApiResponse({
+        status: 401,
+        description: '인증 실패',
+        schema: CommonResponses.unauthorized
+    })
     @UseGuards(JwtAuthGuard)
-    @Patch('/update-image')
+    @Post('/upload-image')
     @UseInterceptors(FileInterceptor('file'))
-    async uploadImage(@CurrentUser() id: string, @UploadedFile(ImageValidationPipe) file: Express.MulterS3.File) {
+    async uploadImage(@CurrentUser() id: string, @UploadedFile(ImageValidationPipe) file?: Express.MulterS3.File) {
+        if (!file) {
+            throw new BadRequestException('업로드할 파일이 없습니다.');
+        }
         const imageUrl = this.uploadService.uploadFile(file);
         return this.userService.uploadImage(id, imageUrl);
     }

@@ -5,6 +5,6 @@ export class RegionPost {
     startDate:string;
     endDate:string;
     tripStyle:string[];
-    heart:number;
-    limitedHeart:number;
+    currentPerson:number;
+    MaxPerson:number;
 }

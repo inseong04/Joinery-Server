@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Res, UseGuards, } from '@nestjs/common';
+import { Body, Controller, Get, Post, Res, UseGuards, BadRequestException, ConflictException } from '@nestjs/common';
 import { SignUpDto } from './dto/signup.dto';
 import { Verification } from './schema/verification.schema';
 import { AuthService } from './auth.service';
@@ -6,7 +6,7 @@ import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation
 import { SignInDto } from './dto/signin.dto';
 import { Response } from 'express';
 import { JwtAuthGuard } from './guard/auth.guard';
-import { CommonResponses, LoginResponse, SignUpResponse } from '../swagger/responses';
+import { CommonResponses, LoginResponse, SignUpResponse, SignUpConflictResponse } from '../swagger/responses';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -66,11 +66,18 @@ export class AuthController {
     @ApiResponse({
         status: 409,
         description: '회원가입 실패 - 이미 존재하는 아이디',
-        schema: CommonResponses.conflict
+        schema: SignUpConflictResponse
     })
     @Post('/sign-up')
     async create(@Body() signUpDto:SignUpDto) : Promise<Verification> {
-        return this.authService.create(signUpDto);
+        try {
+            return await this.authService.create(signUpDto);
+        } catch (error) {
+            if (error.message === '이미 존재하는 아이디입니다.') {
+                throw new ConflictException('이미 존재하는 아이디입니다.');
+            }
+            throw new BadRequestException('회원가입에 실패했습니다.');
+        }
     }
 
     @ApiOkResponse({

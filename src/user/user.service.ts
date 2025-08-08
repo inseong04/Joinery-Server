@@ -6,12 +6,11 @@ import { Region } from 'src/constants/region-list.constant';
 import { UserUpdateDto } from './dto/user.update.dto';
 import { PostSchema } from 'src/post/schema/post.schema';
 import { ApplicationPostModel } from './model/application.post.model';
-import DateUtils from 'src/post/utils/date.utill';
+import DateUtils from 'src/utils/date.utill';
 import { UserPostModel } from './model/user.post.model';
 import { PostGetDto } from 'src/post/dto/post.get.dto';
 import { UserWrotePostModel } from './model/user.wrote.post.model';
 import { UploadService } from 'src/upload/upload.service';
-import { extractS3KeyFromUrl } from 'src/post/utils/extractS3MetFromUrl';
 
 @Injectable()
 export class UserService {
@@ -28,27 +27,52 @@ export class UserService {
         }
         const user = await this.verificationModel.findById(id);
         if (!user) return null;
-        return user;
+        
+        // birthDate를 string으로 변환
+        const userResponse = user.toObject();
+        if (userResponse.birthDate) {
+            userResponse.birthDate = DateUtils.formatDate(userResponse.birthDate) as any;
+        }
+        
+        return userResponse;
     }
 
-    async updateUser(id:string, userUpdateDto: UserUpdateDto, imageUrl: string){
+    async updateUser(id:string, userUpdateDto: UserUpdateDto, imageUrl?: string){
         
         if (imageUrl == undefined) {
             userUpdateDto.profileImageUrl = undefined;
         } else {
             const existPost = await this.verificationModel.findById(id).select('profileImageUrl');
-            this.uploadService.deleteFile(extractS3KeyFromUrl(existPost?.profileImageUrl!)!);
+            if (existPost?.profileImageUrl) {
+                try {
+                    this.uploadService.deleteFile(existPost.profileImageUrl);
+                } catch (error) {
+                    console.error('기존 이미지 삭제 실패:', error);
+                }
+            }
             userUpdateDto.profileImageUrl = imageUrl;
         }
 
         const cleanData = Object.fromEntries(
             Object.entries(userUpdateDto).filter(([_, v]) => v !== undefined)
         );
-        return await this.verificationModel.findByIdAndUpdate(
+        const updatedUser = await this.verificationModel.findByIdAndUpdate(
             id,
             {$set: cleanData},
             {new: true}
         );
+        
+        if (!updatedUser) {
+            return null;
+        }
+        
+        // birthDate를 string으로 변환
+        const userResponse = updatedUser.toObject();
+        if (userResponse.birthDate) {
+            userResponse.birthDate = DateUtils.formatDate(userResponse.birthDate) as any;
+        }
+        
+        return userResponse;
     }
     async getApplicationPost(id: string){
         const user = await this.verificationModel.findById(id).select('likePostId');
@@ -96,8 +120,8 @@ export class UserService {
             const author = await this.verificationModel.findById(post?.authorId).select('nickname').lean();
             wrotePost.startDate = post?.startDate ? DateUtils.formatDate(post.startDate) : null;
             wrotePost.endDate = post?.endDate ? DateUtils.formatDate(post.endDate) : null;
-            wrotePost.limitedHeart = post?.maxPerson ?? 0;
-            wrotePost.heart = post?.currentPerson ?? 404;
+            wrotePost.MaxPerson = post?.maxPerson ?? 0;
+            wrotePost.currentPerson = post?.currentPerson ?? 404;
             const now = new Date();
             wrotePost.isEnded = (now >= post!.endDate) ? true : false;
             if (wrotePost.isEnded)
@@ -110,18 +134,42 @@ export class UserService {
 
     async updateInterestRegion(id: string, interestRegionList: number[]){
         // 숫자 배열을 그대로 사용 (Region enum 값이 숫자이므로)
-        return await this.verificationModel.findByIdAndUpdate(
-            id, 
+        const updatedUser = await this.verificationModel.findByIdAndUpdate(
+            id,
             {$addToSet:{ interestRegion: { $each: interestRegionList}}},
             {new: true}  // 업데이트 후 데이터 반환
         );
+        
+        if (!updatedUser) {
+            return null;
+        }
+        
+        // birthDate를 string으로 변환
+        const userResponse = updatedUser.toObject();
+        if (userResponse.birthDate) {
+            userResponse.birthDate = DateUtils.formatDate(userResponse.birthDate) as any;
+        }
+        
+        return userResponse;
     }
 
     async deleteInterestRegion(id: string, deleteInterestRegion: number){
         // 숫자를 그대로 사용 (Region enum 값이 숫자이므로)
         await this.verificationModel.updateOne({_id:id}, {$pull:{interestRegion: deleteInterestRegion}});
         // 업데이트 후 사용자 정보 반환
-        return await this.verificationModel.findById(id);
+        const user = await this.verificationModel.findById(id);
+        
+        if (!user) {
+            return null;
+        }
+        
+        // birthDate를 string으로 변환
+        const userResponse = user.toObject();
+        if (userResponse.birthDate) {
+            userResponse.birthDate = DateUtils.formatDate(userResponse.birthDate) as any;
+        }
+        
+        return userResponse;
     }
 
     async uploadImage(id: string, imageUrl: string) {

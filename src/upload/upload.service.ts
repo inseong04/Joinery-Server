@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { ConfigService } from '@nestjs/config';
 import { createS3Client } from 'src/config/multer.config';
+import { FILE_CONSTANTS } from 'src/constants/file.constants';
 
 @Injectable()
 export class UploadService {
@@ -13,7 +14,7 @@ export class UploadService {
 
     uploadFile(file: Express.MulterS3.File): string {
         if(!file){
-            throw new BadRequestException('파일이 존재하지 않습니다.');
+            throw new BadRequestException(FILE_CONSTANTS.ERROR_MESSAGES.FILE_REQUIRED);
         }
         return file.location;
     }
@@ -25,7 +26,7 @@ export class UploadService {
             const key = this.extractKeyFromUrl(fileUrl, bucketName);
             
             if (!key) {
-                throw new BadRequestException('유효하지 않은 S3 URL입니다.');
+                throw new BadRequestException(FILE_CONSTANTS.ERROR_MESSAGES.INVALID_S3_URL);
             }
 
             const deleteCommand = new DeleteObjectCommand({
@@ -37,7 +38,7 @@ export class UploadService {
             return true;
         } catch (error) {
             console.error('S3 파일 삭제 실패:', error);
-            throw new BadRequestException('파일 삭제에 실패했습니다.');
+            throw new BadRequestException(FILE_CONSTANTS.ERROR_MESSAGES.DELETE_FAILED);
         }
     }
 
