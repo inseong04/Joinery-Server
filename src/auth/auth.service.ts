@@ -3,10 +3,11 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Verification } from './schema/verification.schema';
 import { SignUpDto } from './dto/signup.dto';
-import DateUtils from 'src/post/utils/date.utill';
+import DateUtils from 'src/utils/date.utill';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { SignInDto } from './dto/signin.dto';
+import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class AuthService {
     constructor(
@@ -27,6 +28,12 @@ export class AuthService {
     }
     
     async create(signUpDto: SignUpDto): Promise<Verification> {
+        // username 중복 체크
+        const existingUser = await this.verificationModel.findOne({ username: signUpDto.username });
+        if (existingUser) {
+            throw new Error('이미 존재하는 아이디입니다.');
+        }
+
         // 클라이언트에서 string(YYYY-MM-DD)로 받은 birthDate를 Date로 변환
         if (signUpDto.birthDate) {
             signUpDto.birthDate = new Date(signUpDto.birthDate) as any;
@@ -36,7 +43,17 @@ export class AuthService {
         signUpDto.likePostId= [];
         signUpDto.joinPostId = [];
         signUpDto.interestRegion= [];
+        signUpDto.profileImageUrl = process.env.DEFAULT_PROFILE_IMAGE_URL!;
+        
         const createUser = new this.verificationModel(signUpDto);
-        return createUser.save();
+        const savedUser = await createUser.save();
+        
+        // birthDate를 string으로 변환하여 응답
+        const userResponse = savedUser.toObject();
+        if (userResponse.birthDate) {
+            userResponse.birthDate = DateUtils.formatDate(userResponse.birthDate) as any;
+        }
+        
+        return userResponse;
     }
 }

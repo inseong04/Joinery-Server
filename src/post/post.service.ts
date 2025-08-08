@@ -9,7 +9,8 @@ import { Verification } from 'src/auth/schema/verification.schema';
 import { isHeartDto } from './dto/isHeart.dto';
 import { HeartType } from 'src/constants/user.constants';
 import { PreviewPostModel } from './model/preview.post.model';
-import DateUtils from 'src/post/utils/date.utill';
+import DateUtils from 'src/utils/date.utill';
+import { MembersInformationModel } from './model/members-information.model';
 
 @Injectable()
 export class PostService {
@@ -31,8 +32,8 @@ export class PostService {
                     username: user?.nickname ?? 'Unknown',
                     startDate: DateUtils.formatDate(item.startDate),
                     endDate: DateUtils.formatDate(item.endDate),
-                    heart: item.currentPerson,
-                    limitedHeart: item.maxPerson,
+                    currentPerson: item.currentPerson,
+                    maxPerson: item.maxPerson,
                     
                 };
             }));
@@ -50,8 +51,8 @@ export class PostService {
                 username: user?.nickname ?? 'Unknown',
                 startDate: DateUtils.formatDate(item.startDate),
                 endDate: DateUtils.formatDate(item.endDate),
-                heart: item.currentPerson,
-                limitedHeart: item.maxPerson,
+                currentPerson: item.currentPerson,
+                maxPerson: item.maxPerson,
                 };
             }));    
         result = postList;
@@ -72,14 +73,16 @@ return result;
         const post = await this.PostModel.findById(id).lean();
         if (!post) throw new NotFoundException();
 
-        const authorName = await this.verificationModel.findById(post.authorId).select('nickname').lean();
-        const members: string[] = await Promise.all(
+        const author = await this.verificationModel.findById(post.authorId).select('nickname username').lean();
+        const members: MembersInformationModel[] = await Promise.all(
             post.memberId.map(async id => {
-                const user = await this.verificationModel.findById(id).select('nickname').lean();
-                return user?.nickname ?? 'Unknown';
+                const user = await this.verificationModel.findById(id).select('nickname username').lean();
+                const someMember = new MembersInformationModel;
+                someMember.nickname = user?.nickname ?? 'Unknown';
+                someMember.username = user?.username ?? 'Unknown';
+                return someMember;
             })
         );
-
         // 토큰 있을시
         if (userId != undefined) {
             const user = await this.verificationModel.findById(userId).select('')
@@ -115,7 +118,6 @@ return result;
                 membersName: members
             } as unknown as DetailPost;
         }
-
     }
 
     async updateLike(id: string, userId: string){

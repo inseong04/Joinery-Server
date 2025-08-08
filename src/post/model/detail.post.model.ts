@@ -29,8 +29,8 @@ export class DetailPost {
     memberId:string[];
     description:string;
     schedule:Schedule[];
-    limitedHeart:number;
-    heart:number;
+    MaxPerson:number;
+    currentPerson:number;
     likedUserId:string[];
     tripStyle:string[];
 }

@@ -17,8 +17,8 @@ export class PreviewPostModel {
     endDate: string;
 
     @ApiProperty({ description: '하트 수' })
-    heart: number;
+    currentPerson: number;
 
     @ApiProperty({ description: '제한 하트 수' })
-    limitedHeart: number;
+    maxPerson: number;
 }

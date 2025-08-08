@@ -94,7 +94,7 @@ export const SignUpResponse = {
       example: ['자연', '문화', '맛집']
     },
     userDescription: { type: 'string', example: '여행을 좋아하는 사람입니다.' },
-    createdAt: { type: 'string', example: '2024-01-01T00:00:00.000Z' }
+    createdAt: { type: 'string', example: '2024-01-01 10' }
   }
 };
 
@@ -118,7 +118,7 @@ export const UserResponse = {
       items: { type: 'object' },
       example: [{ id: 1, name: '서울' }, { id: 2, name: '부산' }]
     },
-    createdAt: { type: 'string', example: '2024-01-01T00:00:00.000Z' }
+    createdAt: { type: 'string', example: '2024-01-01 10' }
   }
 };
 
@@ -152,7 +152,7 @@ export const PostDetailResponse = {
     },
     isLiked: { type: 'boolean', example: true },
     likeCount: { type: 'number', example: 5 },
-    createdAt: { type: 'string', example: '2024-01-01T00:00:00.000Z' }
+    createdAt: { type: 'string', example: '2024-01-01 10' }
   }
 };
 
@@ -174,4 +174,33 @@ export const PopularRegionsResponse = {
     { count: 6, regionId: 4, regionName: '경주' },
     { count: 4, regionId: 5, regionName: '강릉' }
   ]
+};
+
+// 파일 업로드 응답 스키마
+export const FileUploadResponse = {
+  type: 'object',
+  properties: {
+    message: { type: 'string', example: 'success' },
+    url: { type: 'string', example: 'uploads/1754546984873-profile-image.png' }
+  }
+};
+
+// 파일 업로드 에러 응답 스키마
+export const FileUploadErrorResponse = {
+  type: 'object',
+  properties: {
+    message: { type: 'string', example: '지원하지 않는 파일 형식입니다. PNG, JPEG, JPG 파일만 업로드 가능합니다.' },
+    error: { type: 'string', example: 'Bad Request' },
+    statusCode: { type: 'number', example: 400 }
+  }
+};
+
+// 회원가입 중복 아이디 에러 응답 스키마
+export const SignUpConflictResponse = {
+  type: 'object',
+  properties: {
+    message: { type: 'string', example: '이미 존재하는 아이디입니다.' },
+    error: { type: 'string', example: 'Conflict' },
+    statusCode: { type: 'number', example: 409 }
+  }
 }; 

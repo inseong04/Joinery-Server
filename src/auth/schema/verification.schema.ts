@@ -48,5 +48,9 @@ export class Verification {
         @ApiProperty({description:'관심지역 목록'})
         @Prop({type:[Number], enum: Object.values(Region)})
         interestRegion:Region[];
+
+        @ApiProperty({description:'프로필 이미지 경로'})
+        @Prop()
+        profileImageUrl:string;
 }
 export const VerificationSchema = SchemaFactory.createForClass(Verification);

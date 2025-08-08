@@ -49,6 +49,8 @@ export class SignUpDto {
             @IsOptional()
             interestRegion:Region[];
 
-
+            @ApiHideProperty()
+            @IsOptional()
+            profileImageUrl:string;
 
 }

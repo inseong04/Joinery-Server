@@ -4,6 +4,6 @@ export class UserWrotePostModel{
     startDate:string|null;
     endDate:string|null;
     isEnded:boolean|null;
-    limitedHeart:number;
-    heart:number;
+    MaxPerson:number;
+    currentPerson:number;
 }
