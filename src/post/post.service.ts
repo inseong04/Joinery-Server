@@ -71,21 +71,7 @@ return result;
 
     async getPost(id : string, userId:string): Promise<DetailPost | null>{
         const post = await this.PostModel.findById(id).lean();
-        const user = await this.verificationModel.findById(userId).select('')
-
         if (!post) throw new NotFoundException();
-        if (!user) throw new NotFoundException();
-        // 아무도 하트X-> 아무데도 등록X
-        // 유저만 하트 -> likePostId에 postId등록, likedUserId에 userId 등록, memberId에는 등록X
-        // 둘다 하트  -> likePostId에는 이미 등록, likedUserId에는 userId 삭제, memberId에는 등록O 
-        let heartType : HeartType = HeartType.NoOne;
-        if (user.likePostId.includes(id)){
-            if (post.memberId.includes(userId)){
-                heartType = HeartType.Both;
-            } else {
-                heartType = HeartType.UserOnly;
-            }
-        } 
 
         const author = await this.verificationModel.findById(post.authorId).select('nickname username').lean();
         const members: MembersInformationModel[] = await Promise.all(
@@ -97,16 +83,41 @@ return result;
                 return someMember;
             })
         );
-        // startDate, endDate를 'YYYY-MM-DD HH' string로 변환
-        return {
-            ...post,
-            startDate: this.formatDateHour(post.startDate),
-            endDate: this.formatDateHour(post.endDate),
-            heartType: heartType,
-            authorNickname: author!.nickname,
-            authorUsername: author!.username,
-            membersName: members
-        } as unknown as DetailPost;
+        // 토큰 있을시
+        if (userId != undefined) {
+            const user = await this.verificationModel.findById(userId).select('')
+            if (!user) throw new NotFoundException();
+            // 아무도 하트X-> 아무데도 등록X
+            // 유저만 하트 -> likePostId에 postId등록, likedUserId에 userId 등록, memberId에는 등록X
+            // 둘다 하트  -> likePostId에는 이미 등록, likedUserId에는 userId 삭제, memberId에는 등록O 
+            let heartType : HeartType = HeartType.NoOne;
+            if (user.likePostId.includes(id)){
+                if (post.memberId.includes(userId)){
+                    heartType = HeartType.Both;
+                } else {
+                    heartType = HeartType.UserOnly;
+                }
+            }
+            // startDate, endDate를 'YYYY-MM-DD HH' string로 변환
+            return {
+                ...post,
+                startDate: this.formatDateHour(post.startDate),
+                endDate: this.formatDateHour(post.endDate),
+                heartType: heartType,
+                authorName: authorName!.nickname,
+                membersName: members
+            } as unknown as DetailPost;
+            
+        } else { // 토큰 없을시
+            // startDate, endDate를 'YYYY-MM-DD HH' string로 변환
+            return {
+                ...post,
+                startDate: this.formatDateHour(post.startDate),
+                endDate: this.formatDateHour(post.endDate),
+                authorName: authorName!.nickname,
+                membersName: members
+            } as unknown as DetailPost;
+        }
     }
 
     async updateLike(id: string, userId: string){

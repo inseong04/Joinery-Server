@@ -17,6 +17,15 @@ export class UserController {
         private readonly uploadService: UploadService,
     ){}
 
+
+    @ApiOperation({summary:'프로필 가져오기'})
+    @ApiBearerAuth('access-token')
+    @UseGuards(JwtAuthGuard)
+    @Get('')
+    async getUserById(@CurrentUser() id: string){
+        return this.userService.getUserById(id);
+    }
+
     @ApiOperation({
         summary:'유저 정보 수정',
         description: '현재 로그인한 사용자의 정보를 수정합니다. 닉네임, 자기소개, 여행 스타일, 프로필 이미지를 변경할 수 있습니다. 이미지 파일은 PNG, JPEG, JPG 형식을 지원합니다.'
@@ -183,7 +192,7 @@ export class UserController {
 
     @ApiOperation({
         summary:'특정 사용자 정보 조회',
-        description: '사용자 ID로 특정 사용자의 정보를 조회합니다.'
+        description: '사용자 ID(username)로 특정 사용자의 정보를 조회합니다.'
     })
     @ApiParam({
         name:'id', 
@@ -200,9 +209,9 @@ export class UserController {
         description: '사용자를 찾을 수 없음',
         schema: CommonResponses.notFound
     })
-    @Get('/:id')
-    async getUser(@Param('id') id:string){
-        return this.userService.getUser(id);
+    @Get('/:username')
+    async getUser(@Param('username') username:string){
+        return this.userService.getUser(username);
     }
 
     @ApiOperation({

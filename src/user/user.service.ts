@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { Verification } from 'src/auth/schema/verification.schema';
@@ -20,14 +20,9 @@ export class UserService {
         private uploadService: UploadService
     ){}
 
-    async getUser(id:string){
-        // ObjectId 유효성 검사
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return null;
-        }
-        const user = await this.verificationModel.findById(id);
-        if (!user) return null;
-        
+    async getUser(username:string){
+        const user = await this.verificationModel.findOne({username: username})
+        if (!user) throw new NotFoundException();
         // birthDate를 string으로 변환
         const userResponse = user.toObject();
         if (userResponse.birthDate) {
@@ -35,6 +30,14 @@ export class UserService {
         }
         
         return userResponse;
+    }
+
+    async getUserById(id:string) {
+        const user = await this.verificationModel.findById(id);
+        
+        if (!user) throw new NotFoundException();
+        return user;
+
     }
 
     async updateUser(id:string, userUpdateDto: UserUpdateDto, imageUrl?: string){
