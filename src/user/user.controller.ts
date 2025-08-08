@@ -13,6 +13,15 @@ export class UserController {
         private readonly userService: UserService,
     ){}
 
+
+    @ApiOperation({summary:'프로필 가져오기'})
+    @ApiBearerAuth('access-token')
+    @UseGuards(JwtAuthGuard)
+    @Get('')
+    async getUserById(@CurrentUser() id: string){
+        return this.userService.getUserById(id);
+    }
+
     @ApiOperation({
         summary:'유저 정보 수정',
         description: '현재 로그인한 사용자의 정보를 수정합니다. 닉네임, 자기소개, 여행 스타일을 변경할 수 있습니다.'
@@ -167,11 +176,6 @@ export class UserController {
     @Get('/:username')
     async getUser(@Param('username') username:string){
         return this.userService.getUser(username);
-    }
-
-    @Get('/id/:id')
-    async getUserById(@Param('id') id:string){
-        return this.userService.getUserById
     }
 
     @ApiOperation({
