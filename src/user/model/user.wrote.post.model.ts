@@ -6,4 +6,5 @@ export class UserWrotePostModel{
     isEnded:boolean|null;
     MaxPerson:number;
     currentPerson:number;
+    title:string;
 }

@@ -6,4 +6,5 @@ export class UserPostModel{
     endDate:string|null;
     isJoin:boolean|null;
     isEnded:boolean|null;
+    title:string;
 }

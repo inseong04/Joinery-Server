@@ -103,6 +103,7 @@ export class UserService {
             likedPost.startDate = post?.startDate ? DateUtils.formatDate(post.startDate) : null;
             likedPost.endDate = post?.endDate ? DateUtils.formatDate(post.endDate) : null;
             likedPost.isJoin = post?.memberId.includes(id) ? true : false;
+            likedPost.title = post?.title ?? 'Title';
             const now = new Date();
             likedPost.isEnded = (now >= post!.endDate) ? true: false; 
             if (likedPost.isEnded) 
@@ -133,6 +134,7 @@ export class UserService {
             wrotePost.endDate = post?.endDate ? DateUtils.formatDate(post.endDate) : null;
             wrotePost.MaxPerson = post?.maxPerson ?? 0;
             wrotePost.currentPerson = post?.currentPerson ?? 404;
+            wrotePost.title = post?.title ?? 'Title';
             const now = new Date();
             wrotePost.isEnded = (now >= post!.endDate) ? true : false;
             if (wrotePost.isEnded)
