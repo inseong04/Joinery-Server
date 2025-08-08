@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { AuthorModel } from './author.model';
 
 export class PreviewPostModel {
     @ApiProperty({ description: '게시글 ID', type: String })
@@ -7,8 +8,8 @@ export class PreviewPostModel {
     @ApiProperty({ description: '게시글 제목' })
     title: string;
 
-    @ApiProperty({ description: '작성자 닉네임' })
-    username: string;
+    @ApiProperty({ description: '작성자 정보' })
+    author: AuthorModel;
 
     @ApiProperty({ description: '시작 날짜' })
     startDate: string;
