@@ -24,6 +24,12 @@ export class UserService {
         return user;
     }
 
+    async getUserById(id:string) {
+        const user = await this.verificationModel.findById(id);
+        if (!user) throw new NotFoundException();
+        return user;
+    }
+
     async updateUser(id:string, userUpdateDto: UserUpdateDto){
         const cleanData = Object.fromEntries(
             Object.entries(userUpdateDto).filter(([_, v]) => v !== undefined)

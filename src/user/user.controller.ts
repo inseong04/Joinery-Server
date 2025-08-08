@@ -169,6 +169,11 @@ export class UserController {
         return this.userService.getUser(username);
     }
 
+    @Get('/id/:id')
+    async getUserById(@Param('id') id:string){
+        return this.userService.getUserById
+    }
+
     @ApiOperation({
         summary:'관심지역 수정',
         description: '현재 로그인한 사용자의 관심지역 목록을 수정합니다.'
