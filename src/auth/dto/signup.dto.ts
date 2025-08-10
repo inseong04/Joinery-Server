@@ -4,6 +4,12 @@ import { Gender } from "src/constants/user.constants";
 import { Region } from "src/constants/region-list.constant";
 
 export class SignUpDto {
+
+            @ApiProperty({description:'공급처 구분. local / google'})
+            @IsEnum(['local', 'google'])
+            @IsOptional()
+            provider:string;
+
             @ApiProperty({description:'아이디'})
             @IsString()
             username:string;

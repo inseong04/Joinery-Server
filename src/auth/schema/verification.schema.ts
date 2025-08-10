@@ -5,12 +5,17 @@ import { Region } from "src/constants/region-list.constant";
 
 @Schema({timestamps: true})
 export class Verification {
+
+        @ApiProperty({description:'공급처 구분. local / google'})
+        @Prop({ required:true, enum: ['local', 'google'], default: 'local'})
+        provider:string;
+
         @ApiProperty({description:'아이디'})
         @Prop({required:true, unique:true})
         username:string;
         
         @ApiProperty({description:'비밀번호'})
-        @Prop({required:true, select: false})
+        @Prop({select: false})
         password:string;
         
         @ApiProperty({description:'닉네임'})
