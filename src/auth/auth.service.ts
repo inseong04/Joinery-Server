@@ -8,22 +8,26 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { SignInDto } from './dto/signin.dto';
 import { ConfigService } from '@nestjs/config';
+import { Profile } from 'src/types/passport';
 @Injectable()
 export class AuthService {
     constructor(
         @InjectModel('User') private verificationModel:Model<Verification>,    private jwtService:JwtService
     ) {}
 
-
     async validateUser(signInDto: SignInDto): Promise<{accessToken: string} | undefined> {
         const user = await this.verificationModel.findOne({ username: signInDto.username }).select('+password');
-        if (!user) return undefined;
-        const isMatch = await bcrypt.compare(signInDto.password, user.password);
-        
-        if (!isMatch) return undefined;
-        
+
+        if (!user) return undefined; // 수정
+
+        if (user?.provider == 'local') {
+            const isMatch = await bcrypt.compare(signInDto.password, user.password);
+            if (!isMatch) return undefined; // 수정
+        }
+            
         const payload = { username: user.username, sub: user._id };
         const accessToken = await this.jwtService.signAsync(payload);
+
         return { "accessToken": accessToken };
     }
     
@@ -55,5 +59,37 @@ export class AuthService {
         }
         
         return userResponse;
+    }
+
+    async findOrCreateUserByGoogle(profile: Profile){
+        const user = await this.verificationModel.findOne({username:profile.id});
+        if(user) {
+            return user;
+        }
+
+        const newUser = new SignUpDto();
+        newUser.username = profile.id;
+        newUser.nickname = profile.displayName;
+        // Google 프로필에서 생일 정보 검증 및 전처리
+        if (profile.birthdays && profile.birthdays[0] && profile.birthdays[0].date) {
+            const { year, month, day } = profile.birthdays[0].date;
+            if (year && month && day && year > 1900 && year <= new Date().getFullYear()) {
+                newUser.birthDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}` as any;
+            } else {
+                newUser.birthDate = '1900-01-01' as any; // 유효하지 않은 날짜는 기본 날짜로 설정
+            }
+        } else {
+            newUser.birthDate = '1900-01-01' as any; // 생년월일 정보가 없으면 기본 날짜로 설정
+        }
+        newUser.wrotePost= [];
+        newUser.likePostId= [];
+        newUser.joinPostId = [];
+        newUser.interestRegion= [];
+        newUser.profileImageUrl = process.env.DEFAULT_PROFILE_IMAGE_URL!;
+        newUser.provider = 'google';
+
+        const createUser = new this.verificationModel(newUser);
+
+        return await createUser.save();
     }
 }

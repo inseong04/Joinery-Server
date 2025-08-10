@@ -1,12 +1,14 @@
-import { Body, Controller, Get, Post, Res, UseGuards, BadRequestException, ConflictException } from '@nestjs/common';
+import { Body, Controller, Get, Post, Res, UseGuards, BadRequestException, ConflictException, Req } from '@nestjs/common';
 import { SignUpDto } from './dto/signup.dto';
 import { Verification } from './schema/verification.schema';
 import { AuthService } from './auth.service';
-import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiHideProperty, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SignInDto } from './dto/signin.dto';
 import { Response } from 'express';
 import { JwtAuthGuard } from './guard/auth.guard';
 import { CommonResponses, LoginResponse, SignUpResponse, SignUpConflictResponse } from '../swagger/responses';
+import { AuthGuard } from '@nestjs/passport';
+import { AuthUser } from './decorators/current-user.decorator';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -78,6 +80,35 @@ export class AuthController {
             }
             throw new BadRequestException('회원가입에 실패했습니다.');
         }
+    }
+
+    @ApiOperation({summary: '구글 로그인', description:'구글 로그인 Oauth'})
+        @ApiCreatedResponse({
+        description: '로그인 성공 시 JWT 토큰 반환',
+        schema: {
+            type: 'object',
+            properties: {
+                accessToken: {
+                    type: 'string',
+                    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+                    description: 'JWT 액세스 토큰'
+                }
+            }
+        }
+    })
+    @ApiResponse({
+        status: 401,
+        description: '로그인 실패',
+        schema: CommonResponses.unauthorized
+    })
+    @Get('/sign-in/google')
+    @UseGuards(AuthGuard('google'))
+    async googleAuth(@Req() req: Request){}
+
+    @Get('/sign-in/google/callback')
+    @UseGuards(AuthGuard('google'))
+    googleAuthRedirect(@AuthUser() signInDto: SignInDto){
+        return this.authService.validateUser(signInDto);
     }
 
     @ApiOkResponse({
