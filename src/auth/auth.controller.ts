@@ -4,7 +4,7 @@ import { Verification } from './schema/verification.schema';
 import { AuthService } from './auth.service';
 import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiHideProperty, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SignInDto } from './dto/signin.dto';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { JwtAuthGuard } from './guard/auth.guard';
 import { CommonResponses, LoginResponse, SignUpResponse, SignUpConflictResponse } from '../swagger/responses';
 import { AuthGuard } from '@nestjs/passport';
