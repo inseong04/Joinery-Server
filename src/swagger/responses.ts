@@ -263,4 +263,53 @@ export const DeletePostResponse = {
   properties: {
     message: { type: 'string', example: 'success' }
   }
+};
+
+// Google OAuth 관련 응답 스키마들
+export const GoogleOAuthResponses = {
+  // Google OAuth 콜백 성공 응답
+  callbackSuccess: {
+    type: 'object',
+    properties: {
+      accessToken: {
+        type: 'string',
+        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        description: 'JWT 액세스 토큰'
+      },
+      user: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', example: '507f1f77bcf86cd799439011' },
+          username: { type: 'string', example: 'google_123456789' },
+          nickname: { type: 'string', example: 'Google User' }
+        }
+      }
+    }
+  },
+
+  // Google OAuth 설정 정보 응답
+  oauthInfo: {
+    type: 'object',
+    properties: {
+      message: { type: 'string', example: 'Google OAuth 설정 정보' },
+      requiredEnvVars: {
+        type: 'array',
+        items: { type: 'string' },
+        example: ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GOOGLE_CALLBACK_URL']
+      },
+      callbackUrl: { type: 'string', example: 'http://localhost:3000/auth/sign-in/google/callback' },
+      authUrl: { type: 'string', example: '/auth/sign-in/google' },
+      setupGuide: { type: 'string', example: 'Google Cloud Console에서 OAuth 2.0 클라이언트 ID를 생성하고 승인된 리다이렉트 URI를 설정하세요.' }
+    }
+  },
+
+  // Google OAuth 서버 오류 응답
+  serverError: {
+    type: 'object',
+    properties: {
+      message: { type: 'string', example: 'Google OAuth 설정 오류' },
+      error: { type: 'string', example: 'Internal Server Error' },
+      statusCode: { type: 'number', example: 500 }
+    }
+  }
 }; 

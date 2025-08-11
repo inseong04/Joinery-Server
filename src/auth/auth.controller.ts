@@ -6,10 +6,16 @@ import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiHideProperty, ApiOkRespo
 import { SignInDto } from './dto/signin.dto';
 import { Response, Request } from 'express';
 import { JwtAuthGuard } from './guard/auth.guard';
-import { CommonResponses, LoginResponse, SignUpResponse, SignUpConflictResponse } from '../swagger/responses';
+import { CommonResponses, LoginResponse, SignUpResponse, SignUpConflictResponse, GoogleOAuthResponses } from '../swagger/responses';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthUser } from './decorators/current-user.decorator';
+import { GOOGLE_OAUTH_CONSTANTS } from '../constants/google-oauth.constants';
 
+/**
+ * 인증 관련 API 컨트롤러
+ * 
+ * Google OAuth 설정 및 사용방법은 /auth/google-oauth-info 엔드포인트를 참조하세요.
+ */
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
@@ -82,29 +88,41 @@ export class AuthController {
         }
     }
 
-    @ApiOperation({summary: '구글 로그인', description:'구글 로그인 Oauth'})
-        @ApiCreatedResponse({
-        description: '로그인 성공 시 JWT 토큰 반환',
-        schema: {
-            type: 'object',
-            properties: {
-                accessToken: {
-                    type: 'string',
-                    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-                    description: 'JWT 액세스 토큰'
-                }
-            }
-        }
+    @ApiOperation({
+        summary: 'Google OAuth 로그인 시작',
+        description: 'Google OAuth 인증 프로세스를 시작합니다. 사용자를 Google 로그인 페이지로 리다이렉트합니다.'
     })
     @ApiResponse({
-        status: 401,
-        description: '로그인 실패',
-        schema: CommonResponses.unauthorized
+        status: 302,
+        description: 'Google OAuth 인증 페이지로 리다이렉트'
+    })
+    @ApiResponse({
+        status: 500,
+        description: 'Google OAuth 설정 오류',
+        schema: GoogleOAuthResponses.serverError
     })
     @Get('/sign-in/google')
     @UseGuards(AuthGuard('google'))
     async googleAuth(@Req() req: Request){}
 
+    @ApiOperation({
+        summary: 'Google OAuth 콜백 처리',
+        description: 'Google OAuth 인증 완료 후 콜백을 처리하고 JWT 토큰을 발급합니다.'
+    })
+    @ApiCreatedResponse({
+        description: 'Google OAuth 로그인 성공 시 JWT 토큰 반환',
+        schema: GoogleOAuthResponses.callbackSuccess
+    })
+    @ApiResponse({
+        status: 401,
+        description: 'Google OAuth 인증 실패 또는 사용자 검증 실패',
+        schema: CommonResponses.unauthorized
+    })
+    @ApiResponse({
+        status: 500,
+        description: 'Google OAuth 처리 중 서버 오류',
+        schema: GoogleOAuthResponses.serverError
+    })
     @Get('/sign-in/google/callback')
     @UseGuards(AuthGuard('google'))
     async googleAuthRedirect(@AuthUser() user: any, @Res() res: Response){
@@ -138,6 +156,28 @@ export class AuthController {
     @Get('/token-test')
     async testToken() {
         return 'success'
+    }
+
+    @ApiOperation({
+        summary: 'Google OAuth 설정 정보',
+        description: 'Google OAuth 설정에 필요한 정보와 사용방법을 제공합니다.'
+    })
+    @ApiOkResponse({
+        description: 'Google OAuth 설정 정보',
+        schema: GoogleOAuthResponses.oauthInfo
+    })
+    @Get('/google-oauth-info')
+    async getGoogleOAuthInfo() {
+        return {
+            message: 'Google OAuth 설정 정보',
+            requiredEnvVars: Object.values(GOOGLE_OAUTH_CONSTANTS.ENV_VARS),
+            callbackUrl: GOOGLE_OAUTH_CONSTANTS.URLS.DEFAULT_CALLBACK,
+            authUrl: GOOGLE_OAUTH_CONSTANTS.URLS.AUTH,
+            setupGuide: GOOGLE_OAUTH_CONSTANTS.SETUP_GUIDE.TITLE,
+            setupSteps: GOOGLE_OAUTH_CONSTANTS.SETUP_GUIDE.STEPS,
+            securityNotes: GOOGLE_OAUTH_CONSTANTS.SECURITY_NOTES,
+            usageGuide: GOOGLE_OAUTH_CONSTANTS.USAGE_GUIDE
+        };
     }
     
 
