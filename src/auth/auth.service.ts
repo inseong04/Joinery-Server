@@ -9,6 +9,8 @@ import { JwtService } from '@nestjs/jwt';
 import { SignInDto } from './dto/signin.dto';
 import { ConfigService } from '@nestjs/config';
 import { Profile } from 'src/types/passport';
+import { UserDataModel } from './model/user-data.model';
+import { Gender } from 'src/constants/user.constants';
 @Injectable()
 export class AuthService {
     constructor(
@@ -61,7 +63,7 @@ export class AuthService {
         return userResponse;
     }
 
-    async findOrCreateUserByGoogle(profile: Profile){
+    async findOrCreateUserByGoogle(profile: Profile, userData?: UserDataModel){
         const user = await this.verificationModel.findOne({username:profile.id});
         if(user) {
             return user;
@@ -70,11 +72,23 @@ export class AuthService {
         const newUser = new SignUpDto();
         newUser.username = profile.id;
         newUser.nickname = profile.displayName;
-        // Google 프로필에서 생일 정보 검증 및 전처리
-        if (profile.birthdays && profile.birthdays[0] && profile.birthdays[0].date) {
-            const { year, month, day } = profile.birthdays[0].date;
+
+        const genderOfUser: string = userData?.genders?.[0].value; 
+        if(genderOfUser == 'male') 
+            newUser.gender = Gender.Male;
+        else if(genderOfUser == 'female')
+            newUser.gender = Gender.Female;
+        else
+            newUser.gender = Gender.Unspecified;
+
+        if (userData?.birthdays?.[0]?.date) {
+            const { year, month, day } = userData.birthdays[0].date;
+            console.log(`year: ${year} month: ${month} day: ${day}`);
+
             if (year && month && day && year > 1900 && year <= new Date().getFullYear()) {
-                newUser.birthDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}` as any;
+                const birthDateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                console.log(`Formatted birth date: ${birthDateString}`);
+                newUser.birthDate = birthDateString as any;
             } else {
                 newUser.birthDate = '1900-01-01' as any; // 유효하지 않은 날짜는 기본 날짜로 설정
             }
