@@ -34,6 +34,17 @@ export default class DateUtils {
     }
     static objectToDate(obj: DateObject): Date {
         return new Date(obj.year, obj.month - 1, obj.day);
-}
+    }
+    
+    // "YYYY-MM-DD" 형식의 문자열을 Date 객체로 변환
+    static stringToDate(dateString: string): Date {
+    const date = new Date(dateString);
+
+    if (isNaN(date.getTime())) {
+        throw new Error("Invalid date format. Expected YYYY-MM-DD");
+    }
+
+    return date;
+    }
     
 }

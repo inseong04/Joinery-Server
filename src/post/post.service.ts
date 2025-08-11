@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PostCreateDto } from './dto/post.create.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -211,11 +211,20 @@ return result;
     }
 
     async updatePost(id: string, updateData: any, userId: string): Promise<DetailPost | null> {
+        
+        const beforeCurrentPerson = await this.PostModel.findById(id).select('currentPerson');
+        if (updateData.currentPerson >= beforeCurrentPerson!)
+            throw new BadRequestException();
+        
+        const now = new Date();
+        if (DateUtils.stringToDate(updateData.startDate) < now || DateUtils.stringToDate(updateData.endDate) < now)
+            throw new BadRequestException();
+
         await this.PostModel.findByIdAndUpdate(
             id,
             { $set: updateData },
             { new: true }
-        ).lean();
+        );
         return this.getPost(id, userId);
     }
 
