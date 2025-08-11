@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Verification } from './schema/verification.schema';
@@ -65,6 +65,19 @@ export class AuthService {
         }
         
         return userResponse;
+    }
+
+    async updatePassword(id: string, password: string){
+        const provider = await this.verificationModel.findById(id).select('provider');
+        if (provider!.provider == 'google')
+            throw new BadRequestException();
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await this.verificationModel.findByIdAndUpdate(id, 
+            {$set: {password: hashedPassword} },
+            {new: false}
+        );
+        return {message:'success'};
     }
 
     async findOrCreateUserByGoogle(profile: Profile, userData?: UserDataModel){

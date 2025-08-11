@@ -333,5 +333,25 @@ export const UserResponses = {
       error: { type: 'string', example: 'Internal Server Error' },
       statusCode: { type: 'number', example: 500 }
     }
+  },
+
+  // 비밀번호 변경 성공 응답
+  updatePasswordSuccess: {
+    type: 'object',
+    properties: {
+      message: { type: 'string', example: '비밀번호가 성공적으로 변경되었습니다.' },
+      userId: { type: 'string', example: '507f1f77bcf86cd799439011' },
+      updatedAt: { type: 'string', example: '2024-01-01T10:00:00.000Z' }
+    }
+  },
+
+  // 비밀번호 변경 서버 오류 응답
+  updatePasswordError: {
+    type: 'object',
+    properties: {
+      message: { type: 'string', example: '비밀번호 변경 중 오류가 발생했습니다.' },
+      error: { type: 'string', example: 'Internal Server Error' },
+      statusCode: { type: 'number', example: 500 }
+    }
   }
 }; 

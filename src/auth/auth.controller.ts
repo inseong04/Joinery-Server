@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Post, Res, UseGuards, BadRequestException, ConflictException, Req, Delete } from '@nestjs/common';
+import { Body, Controller, Get, Post, Res, UseGuards, BadRequestException, ConflictException, Req, Delete, Patch } from '@nestjs/common';
 import { SignUpDto } from './dto/signup.dto';
-import { Verification } from './schema/verification.schema';
+import { UpdatePasswordDto } from './dto/update-password.dto';
+import { Verification, VerificationSchema } from './schema/verification.schema';
 import { AuthService } from './auth.service';
 import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiHideProperty, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SignInDto } from './dto/signin.dto';
@@ -10,6 +11,8 @@ import { CommonResponses, LoginResponse, SignUpResponse, SignUpConflictResponse,
 import { AuthGuard } from '@nestjs/passport';
 import { AuthUser, CurrentUser } from './decorators/current-user.decorator';
 import { GOOGLE_OAUTH_CONSTANTS } from '../constants/google-oauth.constants';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 
 /**
  * 인증 관련 API 컨트롤러
@@ -138,24 +141,43 @@ export class AuthController {
         return res.json(jwt);
     }
 
-    @ApiOkResponse({
-        description: 'JWT 인증 성공',
-        schema: CommonResponses.success
-    })
     @ApiOperation({
-        summary:'JWT 토큰 검증',
-        description: '현재 JWT 토큰의 유효성을 검증합니다. 인증이 필요한 API를 테스트할 때 사용합니다.'
+        summary: '비밀번호 변경',
+        description: '현재 로그인한 사용자의 비밀번호를 새로운 비밀번호로 변경합니다.'
+    })
+    @ApiBody({
+        type: UpdatePasswordDto,
+        description: '새로운 비밀번호 정보'
     })
     @ApiBearerAuth('access-token')
+    @ApiOkResponse({
+        description: '비밀번호 변경 성공',
+        schema: UserResponses.updatePasswordSuccess
+    })
+    @ApiResponse({
+        status: 400,
+        description: '잘못된 비밀번호 형식',
+        schema: CommonResponses.validationError
+    })
     @ApiResponse({
         status: 401,
-        description: 'JWT 토큰이 유효하지 않음',
+        description: '인증 실패 - 유효하지 않은 JWT 토큰',
         schema: CommonResponses.unauthorized
     })
+    @ApiResponse({
+        status: 404,
+        description: '사용자를 찾을 수 없음',
+        schema: CommonResponses.notFound
+    })
+    @ApiResponse({
+        status: 500,
+        description: '서버 오류 - 비밀번호 변경 중 오류 발생',
+        schema: UserResponses.updatePasswordError
+    })
     @UseGuards(JwtAuthGuard)
-    @Get('/token-test')
-    async testToken() {
-        return 'success'
+    @Patch('password')
+    async updatePassword(@CurrentUser() id: string, @Body() updatePasswordDto: UpdatePasswordDto) {
+        return await this.authService.updatePassword(id, updatePasswordDto.password);
     }
 
     @ApiOperation({
