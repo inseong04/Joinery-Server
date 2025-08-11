@@ -24,7 +24,7 @@ export class SignUpDto {
         
             @ApiProperty({description:'성별. 0: 남자 1: 여자'})
             @IsEnum(Gender)
-            gender:Gender
+            gender:Gender;
         
             @ApiProperty({description:'생년월일'})
             @IsString()

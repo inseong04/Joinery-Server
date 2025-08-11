@@ -22,8 +22,8 @@ export class Verification {
         @Prop()
         nickname:string;
     
-        @ApiProperty({description:'성별. 0: 남자 1: 여자'})
-        @Prop({ enum:[0, 1]})
+        @ApiProperty({description:'성별. 0: 남자 1: 여자 2: 미지정'})
+        @Prop({ enum:[0, 1, 2]})
         gender:Gender
     
         @ApiProperty({description:'생년월일'})
