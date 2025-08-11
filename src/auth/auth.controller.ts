@@ -107,8 +107,17 @@ export class AuthController {
 
     @Get('/sign-in/google/callback')
     @UseGuards(AuthGuard('google'))
-    googleAuthRedirect(@AuthUser() signInDto: SignInDto){
-        return this.authService.validateUser(signInDto);
+    async googleAuthRedirect(@AuthUser() user: any, @Res() res: Response){
+        console.log("Google OAuth callback - user:", user);
+        
+        // profile.id를 username으로 사용하여 SignInDto 생성
+        const signInDto = new SignInDto();
+        signInDto.username = user.username; // profile.id 값
+        signInDto.password = 'google-user'; // Google 사용자는 임시 비밀번호
+        
+        const jwt = await this.authService.validateUser(signInDto);
+        res.setHeader('Authorization', 'Bearer '+jwt?.accessToken);
+        return res.json(jwt);
     }
 
     @ApiOkResponse({

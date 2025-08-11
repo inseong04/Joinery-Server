@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Verification } from './schema/verification.schema';
@@ -18,13 +18,15 @@ export class AuthService {
     ) {}
 
     async validateUser(signInDto: SignInDto): Promise<{accessToken: string} | undefined> {
-        const user = await this.verificationModel.findOne({ username: signInDto.username }).select('+password');
 
-        if (!user) return undefined; // 수정
+        console.log(signInDto);
+        const user = await this.verificationModel.findOne({ username: signInDto.username }).select('+password');
+        console.log(user);
+        if (!user) throw new NotFoundException();
 
         if (user?.provider == 'local') {
             const isMatch = await bcrypt.compare(signInDto.password, user.password);
-            if (!isMatch) return undefined; // 수정
+            if (!isMatch) throw new UnauthorizedException();
         }
             
         const payload = { username: user.username, sub: user._id };
@@ -32,6 +34,8 @@ export class AuthService {
 
         return { "accessToken": accessToken };
     }
+
+
     
     async create(signUpDto: SignUpDto): Promise<Verification> {
         // username 중복 체크
@@ -65,7 +69,9 @@ export class AuthService {
 
     async findOrCreateUserByGoogle(profile: Profile, userData?: UserDataModel){
         const user = await this.verificationModel.findOne({username:profile.id});
+
         if(user) {
+            console.log("vcv");
             return user;
         }
 
@@ -83,11 +89,9 @@ export class AuthService {
 
         if (userData?.birthdays?.[0]?.date) {
             const { year, month, day } = userData.birthdays[0].date;
-            console.log(`year: ${year} month: ${month} day: ${day}`);
 
             if (year && month && day && year > 1900 && year <= new Date().getFullYear()) {
                 const birthDateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                console.log(`Formatted birth date: ${birthDateString}`);
                 newUser.birthDate = birthDateString as any;
             } else {
                 newUser.birthDate = '1900-01-01' as any; // 유효하지 않은 날짜는 기본 날짜로 설정

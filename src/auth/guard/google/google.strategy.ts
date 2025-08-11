@@ -43,7 +43,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
           throw new UnauthorizedException();
       }
 
-      return {user};
+      return user;
     } catch (error) {      
         // People API 호출 실패 시 기본 프로필 정보만 사용
         const user = await this.authService.findOrCreateUserByGoogle(profile, undefined)
@@ -52,7 +52,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
           throw new UnauthorizedException();
       }
 
-      return {user};
+      return user;
     }
   }
 }
