@@ -312,4 +312,26 @@ export const GoogleOAuthResponses = {
       statusCode: { type: 'number', example: 500 }
     }
   }
+};
+
+// 사용자 관련 응답 스키마들
+export const UserResponses = {
+  // 사용자 계정 삭제 성공 응답
+  deleteUserSuccess: {
+    type: 'object',
+    properties: {
+      message: { type: 'string', example: '사용자 계정이 성공적으로 삭제되었습니다.' },
+      deletedUserId: { type: 'string', example: '507f1f77bcf86cd799439011' }
+    }
+  },
+
+  // 사용자 계정 삭제 서버 오류 응답
+  deleteUserError: {
+    type: 'object',
+    properties: {
+      message: { type: 'string', example: '계정 삭제 중 오류가 발생했습니다.' },
+      error: { type: 'string', example: 'Internal Server Error' },
+      statusCode: { type: 'number', example: 500 }
+    }
+  }
 }; 

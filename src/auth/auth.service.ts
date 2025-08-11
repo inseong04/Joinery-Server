@@ -110,4 +110,10 @@ export class AuthService {
 
         return await createUser.save();
     }
+
+    async deleteUser(id: string) {
+        await this.verificationModel.deleteOne({_id: id});
+
+        return {message:"success"};
+    }
 }

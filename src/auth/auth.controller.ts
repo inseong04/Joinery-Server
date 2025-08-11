@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Res, UseGuards, BadRequestException, ConflictException, Req } from '@nestjs/common';
+import { Body, Controller, Get, Post, Res, UseGuards, BadRequestException, ConflictException, Req, Delete } from '@nestjs/common';
 import { SignUpDto } from './dto/signup.dto';
 import { Verification } from './schema/verification.schema';
 import { AuthService } from './auth.service';
@@ -6,9 +6,9 @@ import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiHideProperty, ApiOkRespo
 import { SignInDto } from './dto/signin.dto';
 import { Response, Request } from 'express';
 import { JwtAuthGuard } from './guard/auth.guard';
-import { CommonResponses, LoginResponse, SignUpResponse, SignUpConflictResponse, GoogleOAuthResponses } from '../swagger/responses';
+import { CommonResponses, LoginResponse, SignUpResponse, SignUpConflictResponse, GoogleOAuthResponses, UserResponses } from '../swagger/responses';
 import { AuthGuard } from '@nestjs/passport';
-import { AuthUser } from './decorators/current-user.decorator';
+import { AuthUser, CurrentUser } from './decorators/current-user.decorator';
 import { GOOGLE_OAUTH_CONSTANTS } from '../constants/google-oauth.constants';
 
 /**
@@ -179,7 +179,35 @@ export class AuthController {
             usageGuide: GOOGLE_OAUTH_CONSTANTS.USAGE_GUIDE
         };
     }
-    
 
+    @ApiOperation({
+        summary: '사용자 계정 삭제',
+        description: '현재 로그인한 사용자의 계정을 영구적으로 삭제합니다. 삭제된 계정은 복구할 수 없습니다.'
+    })
+    @ApiBearerAuth('access-token')
+    @ApiOkResponse({
+        description: '사용자 계정 삭제 성공',
+        schema: UserResponses.deleteUserSuccess
+    })
+    @ApiResponse({
+        status: 401,
+        description: '인증 실패 - 유효하지 않은 JWT 토큰',
+        schema: CommonResponses.unauthorized
+    })
+    @ApiResponse({
+        status: 404,
+        description: '사용자를 찾을 수 없음',
+        schema: CommonResponses.notFound
+    })
+    @ApiResponse({
+        status: 500,
+        description: '서버 오류 - 계정 삭제 중 오류 발생',
+        schema: UserResponses.deleteUserError
+    })
+    @UseGuards(JwtAuthGuard)
+    @Delete()
+    async deleteUser(@CurrentUser() id: string) {
+        return this.authService.deleteUser(id);
+    }
 
 }
