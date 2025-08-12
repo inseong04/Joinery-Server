@@ -24,14 +24,13 @@ export class PostService {
     let result: PreviewPostModel[] = [];
     //시작날짜 끝나는날짜 미입력시
     if (findRegionDto.startDate == null && findRegionDto.endDate == null) {
-            const posts = await this.PostModel.find({region_id: regionId}).select('title startDate endDate limitedHeart heart createdAt authorId').lean();
+            const posts = await this.PostModel.find({region_id: regionId}).select('title startDate endDate limitedHeart heart createdAt authorId currentPerson maxPerson').lean();
             const postList: PreviewPostModel[] = await Promise.all(posts.map(async item => {
                 const user = await this.verificationModel.findById(item.authorId).select('nickname username profileImageUrl').lean();
                 const author : AuthorModel = new AuthorModel();
                 author.nickname = user?.nickname ?? 'Unknown';
                 author.username = user?.username ?? 'Unknown';
                 author.profileImageUrl = user?.profileImageUrl ?? process.env.DEFAULT_PROFILE_IMAGE_URL!;
-                console.log(item);
                 return {
                     _id: item._id.toString(),
                     title: item.title,
@@ -64,7 +63,7 @@ export class PostService {
             }));    
         result = postList;
         }
-return result;
+    return result;
     }
 
     private formatDateHour(date: Date | string): string {
