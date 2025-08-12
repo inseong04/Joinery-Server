@@ -135,8 +135,7 @@ export class AuthController {
         signInDto.password = 'google-user'; // Google 사용자는 임시 비밀번호
         
         const jwt = await this.authService.validateUser(signInDto);
-        res.setHeader('Authorization', 'Bearer '+jwt?.accessToken);
-        return res.json(jwt);
+        return {accessToken: jwt};
     }
 
     @ApiOperation({

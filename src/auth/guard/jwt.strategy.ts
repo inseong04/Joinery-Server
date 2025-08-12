@@ -19,3 +19,6 @@ export class JwtStrategy extends PassportStrategy(Strategy){
     }
 }
 
+// auth.service.ts 의 validate 로 생성할때는
+//         const payload = { username: user.username, sub: user._id };
+// 서로 달라서 이런 무제 발생하는듯함.
