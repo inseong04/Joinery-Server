@@ -12,6 +12,7 @@ import { PreviewPostModel } from './model/preview.post.model';
 import DateUtils from 'src/utils/date.utill';
 import { MembersInformationModel } from './model/members-information.model';
 import { AuthorModel } from './model/author.model';
+import { Schedule } from './model/schedule.model';
 
 @Injectable()
 export class PostService {
@@ -60,25 +61,15 @@ export class PostService {
                 currentPerson: item.currentPerson,
                 maxPerson: item.maxPerson,
                 };
-            }));    
+            }));
         result = postList;
         }
     return result;
     }
 
-    private formatDateHour(date: Date | string): string {
-      if (!(date instanceof Date)) date = new Date(date);
-      const yyyy = date.getFullYear();
-      const mm = String(date.getMonth() + 1).padStart(2, '0');
-      const dd = String(date.getDate()).padStart(2, '0');
-      const hh = String(date.getHours()).padStart(2, '0');
-      return `${yyyy}-${mm}-${dd} ${hh}`;
-    }
-
     async getPost(id : string, userId:string): Promise<DetailPost | null>{
         const post = await this.PostModel.findById(id).lean();
         if (!post) throw new NotFoundException();
-
         const authorInformation = await this.verificationModel.findById(post.authorId).select('nickname username profileImageUrl').lean();
         const author: AuthorModel = new AuthorModel();
         author.nickname = authorInformation?.nickname ??'Unknown';
@@ -88,7 +79,7 @@ export class PostService {
         const members: MembersInformationModel[] = await Promise.all(
             post.memberId.map(async id => {
                 const user = await this.verificationModel.findById(id).select('nickname username profileImageUrl').lean();
-                const someMember = new MembersInformationModel;
+                const someMember = new MembersInformationModel();
                 someMember.nickname = user?.nickname ?? 'Unknown';
                 someMember.username = user?.username ?? 'Unknown';
                 someMember.profileImageUrl = user?.profileImageUrl ?? process.env.DEFAULT_PROFILE_IMAGE_URL!;
@@ -96,6 +87,13 @@ export class PostService {
                 return someMember;
             })
         );
+
+        const schedules : Schedule[] = post.schedule.map(item => {
+            return {
+                ...item,
+                date: DateUtils.formatDate(item.date),
+            };
+        });
 
         // 토큰 있을시
         if (userId != undefined) {
@@ -114,28 +112,30 @@ export class PostService {
             }
             // startDate, endDate를 'YYYY-MM-DD HH' string로 변환
 
-            const {authorId, memberId, likedUserId, ...rest} = post;
+            const {authorId, memberId, likedUserId, schedule, ...rest} = post;
             
             return {
                 ...rest,
-                startDate: this.formatDateHour(post.startDate),
-                endDate: this.formatDateHour(post.endDate),
+                startDate: DateUtils.formatDate(post.startDate),
+                endDate: DateUtils.formatDate(post.endDate),
                 heartType: heartType,
                 author: author,
                 members: members,
+                schedule: schedules,
                 
             } as unknown as DetailPost;
             
         } else { // 토큰 없을시
-            const {authorId, memberId, likedUserId, ...rest} = post;
+            const {authorId, memberId, likedUserId, schedule, ...rest} = post;
 
             // startDate, endDate를 'YYYY-MM-DD HH' string로 변환
             return {
                 ...rest,
-                startDate: this.formatDateHour(post.startDate),
-                endDate: this.formatDateHour(post.endDate),
+                startDate: DateUtils.formatDate(post.startDate),
+                endDate: DateUtils.formatDate(post.endDate),
                 author: author,
-                members: members
+                members: members,
+                schedule: schedules,
             } as unknown as DetailPost;
         }
     }

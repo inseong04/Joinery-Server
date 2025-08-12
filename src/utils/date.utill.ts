@@ -16,6 +16,7 @@ export default class DateUtils {
         return moment.tz(input, 'YYYY-MM-DD HH', 'Asia/Seoul').format('YYYY-MM-DD');
     }
 
+    // date 타입 -> 2024-05-21 format
     static formatDate(date: Date | string): string {
         if (!(date instanceof Date)) date = new Date(date);
         const yyyy = date.getFullYear();
