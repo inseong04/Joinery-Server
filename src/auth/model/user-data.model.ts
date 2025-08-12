@@ -1,6 +1,7 @@
 export class UserDataModel {
     birthdays:Birthdays;
     genders:Genders;
+    email:string;
 }
 
 interface Birthdays{

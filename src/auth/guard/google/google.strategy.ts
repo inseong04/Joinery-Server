@@ -16,7 +16,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       clientID: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       callbackURL: 'https://port-0-joinery-md0easjwbfa8cb98.sel5.cloudtype.app/auth/sign-in/google/callback',
-      scope: ['profile', 'email', 'https://www.googleapis.com/auth/user.gender.read', 'https://www.googleapis.com/auth/user.birthday.read'],
+      scope: ['profile', 'email', 'https://www.googleapis.com/auth/user.gender.read', 'https://www.googleapis.com/auth/user.birthday.read', 'https://www.googleapis.com/auth/userinfo.email'],
     });
   }
 
