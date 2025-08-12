@@ -141,15 +141,23 @@ export class PostService {
     }
 
     async updateLike(id: string, userId: string){
+        const post = await this.PostModel.findById(id).select('authorId');
+        if(post?.authorId == userId)
+            throw new BadRequestException();
+
         await this.PostModel.findByIdAndUpdate(id, {$addToSet: {likedUserId: userId}},{new: true});
         await this.verificationModel.findByIdAndUpdate(userId, {$addToSet: {likePostId: id}}, {new:true});
-        return {message:"success for updateLike"};
+        return {isLike:true};
     }
 
     async deleteLike(id: string, userId: string){
+        const post = await this.PostModel.findById(id).select('authorId');
+        if(post?.authorId == userId)
+            throw new BadRequestException();
+
         await this.PostModel.findByIdAndUpdate(id, {$pull: { likedUserId: userId}})
         await this.verificationModel.findByIdAndUpdate(userId, {$pull: {likePostId: id}})
-        return {message:"success for deleteLike"};
+        return {isLike:false};
     }
 
     async getPopularRegions(){
