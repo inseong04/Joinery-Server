@@ -129,8 +129,6 @@ export class AuthController {
     @Get('/sign-in/google/callback')
     @UseGuards(AuthGuard('google'))
     async googleAuthRedirect(@AuthUser() user: any, @Res() res: Response){
-        console.log("Google OAuth callback - user:", user);
-        
         // profile.id를 username으로 사용하여 SignInDto 생성
         const signInDto = new SignInDto();
         signInDto.username = user.username; // profile.id 값

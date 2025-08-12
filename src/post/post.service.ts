@@ -94,15 +94,16 @@ export class PostService {
                 date: DateUtils.formatDate(item.date),
             };
         });
-
-        // 토큰 있을시
-        if (userId != undefined) {
+        
+        // 토큰 있을시 (userId가 유효한 문자열인 경우)
+        if (userId && typeof userId === 'string' && userId.trim() !== '') {
             const user = await this.verificationModel.findById(userId).select('')
             if (!user) throw new NotFoundException();
             // 아무도 하트X-> 아무데도 등록X
             // 유저만 하트 -> likePostId에 postId등록, likedUserId에 userId 등록, memberId에는 등록X
             // 둘다 하트  -> likePostId에는 이미 등록, likedUserId에는 userId 삭제, memberId에는 등록O 
             let heartType : HeartType = HeartType.NoOne;
+            
             if (user.likePostId.includes(id)){
                 if (post.memberId.includes(userId)){
                     heartType = HeartType.Both;
@@ -133,6 +134,7 @@ export class PostService {
                 ...rest,
                 startDate: DateUtils.formatDate(post.startDate),
                 endDate: DateUtils.formatDate(post.endDate),
+                heartType: HeartType.NoOne, // 토큰이 없을 때는 NoOne으로 설정
                 author: author,
                 members: members,
                 schedule: schedules,

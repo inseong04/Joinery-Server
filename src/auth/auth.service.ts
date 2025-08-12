@@ -19,9 +19,7 @@ export class AuthService {
 
     async validateUser(signInDto: SignInDto): Promise<{accessToken: string} | undefined> {
 
-        console.log(signInDto);
         const user = await this.verificationModel.findOne({ username: signInDto.username }).select('+password');
-        console.log(user);
         if (!user) throw new NotFoundException();
 
         if (user?.provider == 'local') {
@@ -84,7 +82,6 @@ export class AuthService {
         const user = await this.verificationModel.findOne({username:profile.id});
 
         if(user) {
-            console.log("vcv");
             return user;
         }
 

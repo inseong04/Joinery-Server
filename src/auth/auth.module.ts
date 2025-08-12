@@ -16,9 +16,16 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('SECRET'),
-      }),
+      useFactory: async (configService: ConfigService) => {
+        const secret = configService.get<string>('SECRET') || 'helloworld';
+        
+        return {
+          secret: secret,
+          signOptions: { 
+            expiresIn: configService.get<string>('JWT_EXPIRES_IN') || '365d' // 환경변수로 설정, 기본값 1년
+          },
+        };
+      },
       inject: [ConfigService],
     })
   ],
