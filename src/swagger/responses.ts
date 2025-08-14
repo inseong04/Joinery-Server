@@ -355,3 +355,39 @@ export const UserResponses = {
     }
   }
 }; 
+
+// 멤버 관련 응답 스키마들
+export const MemberResponses = {
+  // 멤버 추가 성공 응답
+  addMemberSuccess: {
+    type: 'object',
+    properties: {
+      success: { type: 'boolean', example: true },
+      message: { type: 'string', example: '멤버가 성공적으로 추가되었습니다.' },
+      postId: { type: 'string', example: '507f1f77bcf86cd799439011' },
+      addedUserId: { type: 'string', example: '507f1f77bcf86cd799439012' }
+    }
+  },
+
+  // 신청 거절 성공 응답
+  rejectApplicationSuccess: {
+    type: 'object',
+    properties: {
+      success: { type: 'boolean', example: true },
+      message: { type: 'string', example: '신청이 성공적으로 거절되었습니다.' },
+      postId: { type: 'string', example: '507f1f77bcf86cd799439011' },
+      rejectedUserId: { type: 'string', example: '507f1f77bcf86cd799439012' }
+    }
+  },
+
+  // 멤버 삭제 성공 응답
+  deleteMemberSuccess: {
+    type: 'object',
+    properties: {
+      success: { type: 'boolean', example: true },
+      message: { type: 'string', example: '멤버가 성공적으로 삭제되었습니다.' },
+      postId: { type: 'string', example: '507f1f77bcf86cd799439011' },
+      removedUserId: { type: 'string', example: '507f1f77bcf86cd799439012' }
+    }
+  }
+};

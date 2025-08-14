@@ -9,7 +9,7 @@ import { RegionPost } from './model/region.post.model';
 import { FindRegionDto } from './dto/find.region.dto';
 import { isValidObjectId } from 'mongoose';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { CommonResponses, PostDetailResponse, PopularRegionsResponse, PostListResponse, LikeResponse, DeletePostResponse } from '../swagger/responses';
+import { CommonResponses, PostDetailResponse, PopularRegionsResponse, PostListResponse, LikeResponse, DeletePostResponse, MemberResponses } from '../swagger/responses';
 import { PreviewPostModel } from './model/preview.post.model';
 import { OptionalJwtAuthGuard } from 'src/auth/guard/optional-auth.guard';
 
@@ -439,5 +439,119 @@ export class PostController {
         @Query() findRegionDto: FindRegionDto
     ): Promise<PreviewPostModel[]> {
         return this.postService.getRegionPost(regionId, findRegionDto);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @ApiOperation({
+        summary:'( 팀장용 ) 동행 멤버 추가',
+        description: '동행 게시글에 새로운 멤버를 추가합니다. 팀장(게시글 작성자)만 멤버를 추가할 수 있습니다.'
+    })
+    @ApiParam({
+        name: 'postId',
+        type: 'string',
+        description: '멤버를 추가할 게시글의 ID',
+        example: '507f1f77bcf86cd799439011'
+    })
+    @ApiBearerAuth('access-token')
+    @ApiOkResponse({
+        description: '멤버 추가 성공',
+        schema: MemberResponses.addMemberSuccess
+    })
+    @ApiResponse({
+        status: 401,
+        description: '인증 실패',
+        schema: CommonResponses.unauthorized
+    })
+    @ApiResponse({
+        status: 403,
+        description: '권한 없음 - 게시글 작성자가 아님',
+        schema: CommonResponses.forbidden
+    })
+    @ApiResponse({
+        status: 404,
+        description: '게시글을 찾을 수 없음',
+        schema: CommonResponses.notFound
+    })
+    @Post('member/:postId')
+    async updateMember(@CurrentUser() id: string, @Param('postId') postId:string, userId:string){
+        return this.postService.updateMember(id, postId, userId);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @ApiOperation({
+        summary:'( 팀장용 ) 동행 신청 유저 거절',
+        description:'팀원이 아닌 좋아요만 눌렀던 유저의 신청을 거절합니다. 팀장(게시글 작성자)만 신청을 거절할 수 있습니다.'
+    })
+    @ApiParam({
+        name: 'postId',
+        type: 'string',
+        description: '신청을 거절할 게시글의 ID',
+        example: '507f1f77bcf86cd799439011'
+    })
+    @ApiBearerAuth('access-token')
+    @ApiOkResponse({
+        description: '신청 거절 성공',
+        schema: MemberResponses.rejectApplicationSuccess
+    })
+    @ApiResponse({
+        status: 401,
+        description: '인증 실패',
+        schema: CommonResponses.unauthorized
+    })
+    @ApiResponse({
+        status: 403,
+        description: '권한 없음 - 게시글 작성자가 아님',
+        schema: CommonResponses.forbidden
+    })
+    @ApiResponse({
+        status: 404,
+        description: '게시글을 찾을 수 없음',
+        schema: CommonResponses.notFound
+    })
+    @Delete('member/:postId')
+    async deleteLikePostId(@CurrentUser() id: string, @Param('postId') postId:string, userId:string){
+        return this.postService.deleteLikePostId(id, postId, userId);   
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @ApiOperation({
+        summary:'( 팀장용 ) 동행 멤버 삭제',
+        description: '동행 게시글에서 특정 멤버를 삭제합니다. 팀장(게시글 작성자)만 멤버를 삭제할 수 있습니다.'
+    })
+    @ApiParam({
+        name: 'postId',
+        type: 'string',
+        description: '멤버를 삭제할 게시글의 ID',
+        example: '507f1f77bcf86cd799439011'
+    })
+    @ApiParam({
+        name: 'userId',
+        type: 'string',
+        description: '삭제할 멤버의 사용자 ID',
+        example: '507f1f77bcf86cd799439012'
+    })
+    @ApiBearerAuth('access-token')
+    @ApiOkResponse({
+        description: '멤버 삭제 성공',
+        schema: MemberResponses.deleteMemberSuccess
+    })
+    @ApiResponse({
+        status: 401,
+        description: '인증 실패',
+        schema: CommonResponses.unauthorized
+    })
+    @ApiResponse({
+        status: 403,
+        description: '권한 없음 - 게시글 작성자가 아님',
+        schema: CommonResponses.forbidden
+    })
+    @ApiResponse({
+        status: 404,
+        description: '게시글을 찾을 수 없음',
+        schema: CommonResponses.notFound
+    })
+    @Delete('member/:postId/:userId')
+    async deleteMember(@CurrentUser() id: string, @Param('postId') postId:string, @Param('userId')userId:string){
+        return this.postService.deleteMember(id, postId, userId);
     }
 }

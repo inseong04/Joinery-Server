@@ -10,7 +10,7 @@ import { isHeartDto } from './dto/isHeart.dto';
 import { HeartType } from 'src/constants/user.constants';
 import { PreviewPostModel } from './model/preview.post.model';
 import DateUtils from 'src/utils/date.utill';
-import { MembersInformationModel } from './model/members-information.model';
+import { UsersInformationModel } from './model/users-information.model';
 import { AuthorModel } from './model/author.model';
 import { Schedule } from './model/schedule.model';
 
@@ -76,10 +76,11 @@ export class PostService {
         author.username = authorInformation?.username ?? 'Unknown';
         author.profileImageUrl = authorInformation?.profileImageUrl ?? process.env.DEFAULT_PROFILE_IMAGE_URL!;
 
-        const members: MembersInformationModel[] = await Promise.all(
+        const members: UsersInformationModel[] = await Promise.all(
             post.memberId.map(async id => {
-                const user = await this.verificationModel.findById(id).select('nickname username profileImageUrl').lean();
-                const someMember = new MembersInformationModel();
+                const user = await this.verificationModel.findById(id).select('nickname username profileImageUrl _id').lean();
+                const someMember = new UsersInformationModel();
+                someMember._id = user?._id.toString() ?? 'Unknown';
                 someMember.nickname = user?.nickname ?? 'Unknown';
                 someMember.username = user?.username ?? 'Unknown';
                 someMember.profileImageUrl = user?.profileImageUrl ?? process.env.DEFAULT_PROFILE_IMAGE_URL!;
@@ -104,7 +105,6 @@ export class PostService {
             // 유저만 하트 -> likePostId에 postId등록, likedUserId에 userId 등록, memberId에는 등록X
             // 둘다 하트  -> likePostId에는 이미 등록, likedUserId에는 userId 삭제, memberId에는 등록O 
             let heartType : HeartType = HeartType.NoOne;
-            console.log();
             if (user.likePostId.includes(id)){
                 if (post.memberId.includes(userId)){
                     heartType = HeartType.Both;
@@ -112,20 +112,49 @@ export class PostService {
                     heartType = HeartType.UserOnly;
                 }
             }
-            // startDate, endDate를 'YYYY-MM-DD HH' string로 변환
-
-            const {authorId, memberId, likedUserId, schedule, ...rest} = post;
             
-            return {
-                ...rest,
-                startDate: DateUtils.formatDate(post.startDate),
-                endDate: DateUtils.formatDate(post.endDate),
-                heartType: heartType,
-                author: author,
-                members: members,
-                schedule: schedules,
-                
-            } as unknown as DetailPost;
+            const {authorId, memberId, schedule, ...rest} = post;
+            // 조회 이용자가 게시글 작성자인지 판별
+            if (user._id.toString() == post.authorId) {
+                // 게시글 작성자일시
+                console.log("작성자");
+                const likedUsers: UsersInformationModel[] = await Promise.all(
+                    post.likedUserId.map(async id => {
+                        const user = await this.verificationModel.findById(id).select('nickname username profileImageUrl _id').lean();
+                        const someUser = new UsersInformationModel();
+                        someUser._id = user?._id.toString() ?? 'Unknown';
+                        someUser.nickname = user?.nickname ?? 'Unknown';
+                        someUser.username = user?.username ?? 'Unknown';
+                        someUser.profileImageUrl = user?.profileImageUrl ?? process.env.DEFAULT_PROFILE_IMAGE_URL!;
+
+                        return someUser;
+                    })
+                );
+
+                return {
+                    ...rest,
+                    startDate: DateUtils.formatDate(post.startDate),
+                    endDate: DateUtils.formatDate(post.endDate),
+                    heartType: heartType,
+                    author: author,
+                    members: members,
+                    schedule: schedules,
+                    likedUsers
+                } as unknown as DetailPost;
+            } 
+
+            else {
+                // 게시글 작성자 아닐시
+                return {
+                    ...rest,
+                    startDate: DateUtils.formatDate(post.startDate),
+                    endDate: DateUtils.formatDate(post.endDate),
+                    heartType: heartType,
+                    author: author,
+                    members: members,
+                    schedule: schedules,  
+                } as unknown as DetailPost;
+            }
             
         } else { // 토큰 없을시
             console.log("토큰X")
@@ -239,9 +268,49 @@ export class PostService {
         return this.getPost(id, userId);
     }
 
+    // 아래 세개 작동안되고 deletePost가 실행됨
     async deletePost(id: string, userId: string) {
         await this.PostModel.findByIdAndDelete(id);
         await this.verificationModel.findByIdAndUpdate(userId, {$pull: {wrotePost: id}});
         return {message:"success"};
+    }
+
+    async checkAuthor(id: string, postId:string) {
+        const post = await this.PostModel.findById(postId).select('authorId');
+        if (id != post?.authorId)
+            throw new BadRequestException();   
+    }
+
+    async updateMember(id:string , postId:string, userId:string){
+        await this.checkAuthor(id, postId);
+
+        await this.verificationModel.updateOne({_id:userId}, 
+            {$addToSet: {joinPostId: postId}}
+        );
+
+        return await this.PostModel.updateOne({_id:postId},
+            {$addToSet: {memberId: userId}},
+        );
+    }
+
+    async deleteLikePostId(id: string, postId:string, userId:string) {
+        await this.checkAuthor(id, postId);
+        await this.verificationModel.updateOne({_id:userId},
+            {$pull: {likePostId: postId}}
+        );
+
+        return await this.PostModel.updateOne({_id: postId},
+            {$pull: {likedUserId: userId}},
+        );
+    }
+
+    async deleteMember(id: string, postId:string, userId:string){
+        await this.checkAuthor(id, postId);
+        await this.verificationModel.updateOne({_id:userId},
+            {$pull: {joinPostId: postId}}
+        );
+        return await this.PostModel.updateOne({_id:postId},
+            {$pull: {memberId: userId}},
+        );
     }
 }
