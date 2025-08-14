@@ -135,7 +135,17 @@ export class AuthController {
         signInDto.password = 'google-user'; // Google 사용자는 임시 비밀번호
         
         const jwt = await this.authService.validateUser(signInDto);
-        return {accessToken: jwt};
+        
+        if (!jwt || !jwt.accessToken) {
+            // JWT 토큰 생성 실패 시 에러 페이지로 리다이렉트
+            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+            return res.redirect(`${frontendUrl}/auth/error?message=token_generation_failed`);
+        }
+        
+        // 프론트엔드로 리다이렉트하면서 JWT 토큰을 쿼리 파라미터로 전달
+        // 프론트엔드의 실제 URL로 변경 (예: React 앱의 기본 URL)
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+        return res.redirect(`${frontendUrl}/?token=${jwt.accessToken}`);
     }
 
     @ApiOperation({
@@ -196,6 +206,21 @@ export class AuthController {
             setupSteps: GOOGLE_OAUTH_CONSTANTS.SETUP_GUIDE.STEPS,
             securityNotes: GOOGLE_OAUTH_CONSTANTS.SECURITY_NOTES,
             usageGuide: GOOGLE_OAUTH_CONSTANTS.USAGE_GUIDE
+        };
+    }
+
+    @ApiOperation({
+        summary: 'Google OAuth 테스트',
+        description: 'Google OAuth 설정이 제대로 되어 있는지 테스트합니다.'
+    })
+    @Get('/google-oauth-test')
+    async googleOAuthTest() {
+        return {
+            message: 'Google OAuth 테스트',
+            clientId: process.env.GOOGLE_CLIENT_ID ? '설정됨' : '설정되지 않음',
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET ? '설정됨' : '설정되지 않음',
+            callbackUrl: 'https://port-0-joinery-md0easjwbfa8cb98.sel5.cloudtype.app/auth/sign-in/google/callback',
+            testUrl: 'http://localhost:3000/auth/sign-in/google'
         };
     }
 
