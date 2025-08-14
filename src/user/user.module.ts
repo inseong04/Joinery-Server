@@ -8,16 +8,18 @@ import { UploadModule } from 'src/upload/upload.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { multerOptionsFactory } from 'src/config/multer.config';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
-  imports:[ 
+  imports:[
+    AuthModule,
     MongooseModule.forFeature([{name: 'User', schema:VerificationSchema}, {name:'Post', schema:PostSchema}]),
     UploadModule,
     MulterModule.registerAsync({
       imports: [ConfigModule],
       useFactory: multerOptionsFactory,
       inject: [ConfigService],
-    })
+    }),
   ],
   controllers: [UserController],
   providers: [UserService]

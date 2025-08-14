@@ -8,7 +8,7 @@ export const CurrentUser = createParamDecorator(
     if (!request.user) {
       return undefined;
     }
-    return request.user.userId;
+    return request.user.sub;
   },
 ); 
 

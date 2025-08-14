@@ -22,7 +22,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         return {
           secret: secret,
           signOptions: { 
-            expiresIn: configService.get<string>('JWT_EXPIRES_IN') || '365d' // 환경변수로 설정, 기본값 1년
+            expiresIn: configService.get<string>('JWT_EXPIRES_IN') || '365d'
           },
         };
       },
@@ -30,6 +30,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     })
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, GoogleStrategy]
+  providers: [AuthService, JwtStrategy, GoogleStrategy],
+  exports: [JwtModule] // JWT 모듈을 export
 })
 export class AuthModule {}

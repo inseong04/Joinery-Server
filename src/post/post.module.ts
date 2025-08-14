@@ -6,7 +6,11 @@ import { newPostSchema, PostSchema } from './schema/post.schema';
 import { Verification, VerificationSchema } from 'src/auth/schema/verification.schema';
 
 @Module({
-  imports:[  MongooseModule.forFeature([{ name: 'Post', schema: newPostSchema }, {name:'User', schema: VerificationSchema}]),],
+  imports:[  
+    MongooseModule.forFeature([{
+       name: 'Post', schema: newPostSchema }, 
+       {name:'User', schema: VerificationSchema}]),
+      ],
   controllers: [PostController],
   providers: [PostService]
 })

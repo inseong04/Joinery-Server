@@ -50,6 +50,7 @@ export class PostController {
         if (!isValidObjectId(id)) {
             return null;
         }
+        console.log(userId);
         return this.postService.getPost(id, userId);
     }
 
