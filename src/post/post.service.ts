@@ -95,15 +95,14 @@ export class PostService {
                 date: DateUtils.formatDate(item.date),
             };
         });
-        
+
         // 토큰 있을시 (userId가 유효한 문자열인 경우)
         if (userId && typeof userId === 'string' && userId.trim() !== '') {
-            console.log("토큰 o")
             const user = await this.verificationModel.findById(userId).select('')
             if (!user) throw new NotFoundException();
-            // 아무도 하트X-> 아무데도 등록X
-            // 유저만 하트 -> likePostId에 postId등록, likedUserId에 userId 등록, memberId에는 등록X
-            // 둘다 하트  -> likePostId에는 이미 등록, likedUserId에는 userId 삭제, memberId에는 등록O 
+            // 아무도 하트X-> 아무데도 등록X heartType 0
+            // 유저만 하트 -> (users) likePostId에 postId등록, (post) likedUserId에 userId 등록, (post)memberId에는 등록X
+            // 둘다 하트  -> (users) likePostId에는 이미 등록, (users)likedUserId에는 userId 삭제, (users) memberId에는 등록O 
             let heartType : HeartType = HeartType.NoOne;
             if (user.likePostId.includes(id)){
                 if (post.memberId.includes(userId)){
@@ -117,7 +116,6 @@ export class PostService {
             // 조회 이용자가 게시글 작성자인지 판별
             if (user._id.toString() == post.authorId) {
                 // 게시글 작성자일시
-                console.log("작성자");
                 const likedUsers: UsersInformationModel[] = await Promise.all(
                     post.likedUserId.map(async id => {
                         const user = await this.verificationModel.findById(id).select('nickname username profileImageUrl _id').lean();
@@ -288,8 +286,17 @@ export class PostService {
             {$addToSet: {joinPostId: postId}}
         );
 
+        const post = await this.PostModel.findById(postId).select('maxPerson currentPerson');
+        if (post == undefined)
+            throw new NotFoundException();
+        
+        const newCurrentPerson = post.currentPerson + 1;
+        if  (post.maxPerson > newCurrentPerson)
+            throw new BadRequestException();
+
         return await this.PostModel.updateOne({_id:postId},
             {$addToSet: {memberId: userId}},
+            {currentPerson: newCurrentPerson}
         );
     }
 
@@ -309,8 +316,16 @@ export class PostService {
         await this.verificationModel.updateOne({_id:userId},
             {$pull: {joinPostId: postId}}
         );
+
+        const post = await this.PostModel.findById(postId).select('currentPerson');
+        if (post == undefined)
+            throw new NotFoundException();
+        
+        const newCurrentPerson = post.currentPerson - 1;
+
         return await this.PostModel.updateOne({_id:postId},
             {$pull: {memberId: userId}},
+            {currentPerson: newCurrentPerson}
         );
     }
 }
