@@ -11,12 +11,19 @@ import { ConfigService } from '@nestjs/config';
 import { Profile } from 'src/types/passport';
 import { UserDataModel } from './model/user-data.model';
 import { Gender } from 'src/constants/user.constants';
+import { MailerService } from '@nestjs-modules/mailer';
+import { getRandomSixDigitString } from 'src/utils/random-num';
+import { mailVerification } from './schema/mail-verification.schema';
+import { MailVerificationDto } from './dto/mail-verification.dto';
 @Injectable()
 export class AuthService {
     private readonly logger = new Logger(AuthService.name);
 
     constructor(
-        @InjectModel('User') private verificationModel:Model<Verification>,    private jwtService:JwtService
+        @InjectModel('User') private verificationModel:Model<Verification>,   
+        @InjectModel('MailVerification') private mailVerificationModel:Model<mailVerification>,
+        private jwtService:JwtService,
+        private readonly mailerService: MailerService,
     ) {}
 
     async validateUser(signInDto: SignInDto): Promise<{accessToken: string} | undefined> {
@@ -67,6 +74,42 @@ export class AuthService {
         }
         
         return userResponse;
+    }
+
+    async sendMail(email: string): Promise<void> {
+        const verificationCode = getRandomSixDigitString();
+    
+        await this.mailerService.sendMail({
+            to:email,
+            subject: "[Joinery] 이메일 인증번호",
+            template:"./verification",
+            context:{
+                verificationCode,
+            },
+        });
+
+        const verification = await this.mailVerificationModel.findOne({email:email});
+        if (verification)
+            throw new BadRequestException();
+
+        const newVerification = new MailVerificationDto();
+        newVerification.email = email;
+        newVerification.verificationCode = verificationCode;
+        const createVerification = new this.mailVerificationModel(newVerification);
+
+        await createVerification.save();
+    }
+
+    async verifyMail(email:string, verificationCode: string){ 
+        const verification = await this.mailVerificationModel.findOne({email:email});
+
+        if (!verification)
+            throw new NotFoundException();
+
+        if (verification.verificationCode != verificationCode)
+            throw new BadRequestException();
+
+        await this.mailVerificationModel.deleteOne({email:email});
     }
 
     async updatePassword(id: string, password: string){

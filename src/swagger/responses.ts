@@ -85,6 +85,7 @@ export const SignUpResponse = {
   properties: {
     id: { type: 'string', example: '507f1f77bcf86cd799439011' },
     username: { type: 'string', example: 'user123' },
+    email: { type: 'string', example: 'user@example.com', description: '사용자 이메일 주소' },
     nickname: { type: 'string', example: '여행러버' },
     gender: { type: 'number', example: 0, description: '0: 남자, 1: 여자' },
     birthDate: { type: 'string', example: '1990-01-01' },
@@ -388,6 +389,110 @@ export const MemberResponses = {
       message: { type: 'string', example: '멤버가 성공적으로 삭제되었습니다.' },
       postId: { type: 'string', example: '507f1f77bcf86cd799439011' },
       removedUserId: { type: 'string', example: '507f1f77bcf86cd799439012' }
+    }
+  }
+};
+
+// 이메일 인증 관련 응답 스키마들
+export const EmailVerificationResponses = {
+  // 이메일 인증 코드 발송 성공 응답
+  sendMailSuccess: {
+    type: 'object',
+    properties: {
+      message: {
+        type: 'string',
+        example: '인증 코드가 이메일로 발송되었습니다.',
+        description: '성공 메시지'
+      },
+      email: {
+        type: 'string',
+        example: 'user@example.com',
+        description: '인증 코드가 발송된 이메일 주소'
+      },
+      expiresAt: {
+        type: 'string',
+        example: '2024-01-01T10:05:00.000Z',
+        description: '인증 코드 만료 시간'
+      }
+    }
+  },
+
+  // 이메일 인증 코드 발송 실패 응답
+  sendMailError: {
+    type: 'object',
+    properties: {
+      message: {
+        type: 'string',
+        example: '이메일 발송에 실패했습니다.'
+      },
+      error: {
+        type: 'string',
+        example: 'Internal Server Error'
+      },
+      statusCode: {
+        type: 'number',
+        example: 500
+      }
+    }
+  },
+
+  // 이메일 인증 성공 응답
+  verifyMailSuccess: {
+    type: 'object',
+    properties: {
+      message: {
+        type: 'string',
+        example: '이메일 인증이 완료되었습니다.',
+        description: '성공 메시지'
+      },
+      email: {
+        type: 'string',
+        example: 'user@example.com',
+        description: '인증된 이메일 주소'
+      },
+      verifiedAt: {
+        type: 'string',
+        example: '2024-01-01T10:00:00.000Z',
+        description: '인증 완료 시간'
+      }
+    }
+  },
+
+  // 이메일 인증 실패 응답 (잘못된 코드)
+  verifyMailInvalidCode: {
+    type: 'object',
+    properties: {
+      message: {
+        type: 'string',
+        example: '잘못된 인증 코드이거나 만료되었습니다.'
+      },
+      error: {
+        type: 'string',
+        example: 'Bad Request'
+      },
+      statusCode: {
+        type: 'number',
+        example: 400
+      }
+    }
+  },
+
+  // 이메일 인증 처리 중 서버 오류 응답
+  verifyMailServerError: {
+    type: 'object',
+    properties: {
+      message: {
+        type: 'string',
+        example: '인증 처리 중 오류가 발생했습니다.'
+      },
+      error: {
+        type: 'string',
+        example: 'Internal Server Error'
+      },
+      statusCode: {
+        type: 'number',
+        example: 500
+      }
     }
   }
 };

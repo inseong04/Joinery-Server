@@ -17,6 +17,10 @@ export class Verification {
         @ApiProperty({description:'비밀번호'})
         @Prop({select: false})
         password:string;
+
+        @ApiProperty({description:'이메일'})
+        @Prop({required:true, unique:true})
+        email:string;
         
         @ApiProperty({description:'닉네임'})
         @Prop()

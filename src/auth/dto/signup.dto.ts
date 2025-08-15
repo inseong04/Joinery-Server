@@ -1,5 +1,5 @@
 import { ApiProperty, ApiHideProperty } from "@nestjs/swagger";
-import { IsArray, IsDate, IsEnum, IsOptional, IsString } from "class-validator";
+import { IsArray, IsDate, IsEmail, IsEnum, IsOptional, IsString } from "class-validator";
 import { Gender } from "src/constants/user.constants";
 import { Region } from "src/constants/region-list.constant";
 
@@ -17,6 +17,10 @@ export class SignUpDto {
             @ApiProperty({description:'비밀번호'})
             @IsString()
             password:string;
+
+            @ApiProperty({description:'이메일'})
+            @IsEmail()
+            email:string;
             
             @ApiProperty({description:'닉네임'})
             @IsString()

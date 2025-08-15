@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Joinery 이메일 인증</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            background-color: #3968FF;
+            color: white;
+            padding: 10px 0;
+            border-radius: 8px 8px 0 0;
+        }
+        .content {
+            padding: 20px;
+            text-align: center;
+        }
+        .verification-code {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 20px auto;
+            display: inline-block;
+            letter-spacing: 2px;
+        }
+        .footer {
+            text-align: center;
+            color: #777;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>Joinery</h1>
+        </div>
+        <div class="content">
+            <h2>이메일 인증</h2>
+            <p>Joinery 이메일 인증 서비스입니다.</p>
+            <p>본인 확인을 위해 아래의 인증 코드를 입력해주세요 : </p>
+            <div class="verification-code"><%= verificationCode %></div>
+            <p>직접 요청하신 것이 아니라면, 무시해주세요.</p>
+        </div>
+        <div class="footer">
+            &copy; <%= new Date().getFullYear() %> Joinery. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>

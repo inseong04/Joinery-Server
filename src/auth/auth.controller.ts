@@ -7,12 +7,14 @@ import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiHideProperty, ApiOkRespo
 import { SignInDto } from './dto/signin.dto';
 import { Response, Request } from 'express';
 import { JwtAuthGuard } from './guard/auth.guard';
-import { CommonResponses, LoginResponse, SignUpResponse, SignUpConflictResponse, GoogleOAuthResponses, UserResponses } from '../swagger/responses';
+import { CommonResponses, LoginResponse, SignUpResponse, SignUpConflictResponse, GoogleOAuthResponses, UserResponses, EmailVerificationResponses } from '../swagger/responses';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthUser, CurrentUser } from './decorators/current-user.decorator';
 import { GOOGLE_OAUTH_CONSTANTS } from '../constants/google-oauth.constants';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { UserMailDto } from './dto/user-mail.dto';
+import { MailVerificationDto } from './dto/mail-verification.dto';
 
 /**
  * 인증 관련 API 컨트롤러
@@ -59,7 +61,7 @@ export class AuthController {
 
     @ApiOperation({
         summary:'회원가입',
-        description: '새로운 사용자 계정을 생성합니다. 아이디, 비밀번호, 닉네임, 성별, 생년월일, 여행 스타일, 자기소개가 필요합니다.'
+        description: '새로운 사용자 계정을 생성합니다. 아이디, 비밀번호, 이메일, 닉네임, 성별, 생년월일, 여행 스타일, 자기소개가 필요합니다.'
     })
     @ApiBody({ 
         type: SignUpDto,
@@ -89,6 +91,65 @@ export class AuthController {
             }
             throw new BadRequestException('회원가입에 실패했습니다.');
         }
+    }
+
+    @ApiOperation({
+        summary: '이메일 인증 코드 발송',
+        description: '사용자가 입력한 이메일 주소로 인증 코드를 발송합니다. 인증 코드는 6자리 숫자로 구성됩니다. 제한시간은 5분입니다. 이후에는 인증정보가 자동으로 삭제됩니다'
+    })
+    @ApiBody({
+        type: UserMailDto,
+        description: '인증 코드를 받을 이메일 주소'
+    })
+    @ApiCreatedResponse({
+        description: '인증 코드 발송 성공',
+        schema: EmailVerificationResponses.sendMailSuccess
+    })
+    @ApiResponse({
+        status: 400,
+        description: '잘못된 이메일 형식',
+        schema: CommonResponses.validationError
+    })
+    @ApiResponse({
+        status: 500,
+        description: '이메일 발송 실패',
+        schema: EmailVerificationResponses.sendMailError
+    })
+    @Post('verification')
+    async sendMail(@Body() body: UserMailDto) {
+        return this.authService.sendMail(body.email);
+    }
+
+    @ApiOperation({
+        summary: '이메일 인증 코드 검증',
+        description: '사용자가 입력한 이메일 주소와 인증 코드를 검증합니다. 인증이 성공하면 해당 이메일이 인증된 상태로 표시됩니다.'
+    })
+    @ApiBody({
+        type: MailVerificationDto,
+        description: '이메일 주소와 인증 코드'
+    })
+    @ApiOkResponse({
+        description: '이메일 인증 성공',
+        schema: EmailVerificationResponses.verifyMailSuccess
+    })
+    @ApiResponse({
+        status: 400,
+        description: '잘못된 인증 코드 또는 만료된 인증 코드',
+        schema: EmailVerificationResponses.verifyMailInvalidCode
+    })
+    @ApiResponse({
+        status: 404,
+        description: '인증 코드를 찾을 수 없음',
+        schema: CommonResponses.notFound
+    })
+    @ApiResponse({
+        status: 500,
+        description: '인증 처리 중 서버 오류',
+        schema: EmailVerificationResponses.verifyMailServerError
+    })
+    @Post('verification/confirm')
+    async verifyMail(@Body() body: MailVerificationDto) {
+        return this.authService.verifyMail(body.email, body.verificationCode);
     }
 
     @ApiOperation({
