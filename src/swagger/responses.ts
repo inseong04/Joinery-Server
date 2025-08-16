@@ -496,3 +496,45 @@ export const EmailVerificationResponses = {
     }
   }
 };
+
+// 북마크 관련 응답 스키마들
+export const BookmarkResponses = {
+  // 북마크 게시글 조회 성공 응답
+  getBookmarksSuccess: {
+    type: 'object',
+    properties: {
+      bookmarks: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            _id: { type: 'string', example: '507f1f77bcf86cd799439011' },
+            title: { type: 'string', example: '제주도 여행 같이 가실 분' },
+            region_id: { type: 'number', example: 8 },
+            startDate: { type: 'string', example: '2024-01-01' },
+            endDate: { type: 'string', example: '2024-01-03' },
+            username: { type: 'string', example: '작성자닉네임' },
+            heart: { type: 'number', example: 5 },
+            limitedHeart: { type: 'number', example: 10 }
+          }
+        }
+      }
+    }
+  },
+
+  // 북마크 추가 성공 응답
+  addBookmarkSuccess: {
+    type: 'object',
+    properties: {
+      message: { type: 'string', example: '북마크가 성공적으로 추가되었습니다.' }
+    }
+  },
+
+  // 북마크 제거 성공 응답
+  deleteBookmarkSuccess: {
+    type: 'object',
+    properties: {
+      message: { type: 'string', example: '북마크가 성공적으로 제거되었습니다.' }
+    }
+  }
+};

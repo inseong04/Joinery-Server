@@ -63,4 +63,8 @@ export class SignUpDto {
             @IsOptional()
             profileImageUrl:string;
 
+            @ApiHideProperty()
+            @IsOptional()
+            bookmarkPostId:string[];
+
 }

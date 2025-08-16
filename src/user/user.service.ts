@@ -190,5 +190,25 @@ export class UserService {
         return { message: 'success', url: imageUrl};
     }
 
+    async getBookmark(id:string, postId:string){
+        const user = await this.verificationModel.findById(id).select('bookmarkPostId');
+        if (!user)
+            throw new NotFoundException();
+        
+        return user.bookmarkPostId;
+    }
+
+    async updateBookmark(id: string, postId:string){
+        await this.verificationModel.findByIdAndUpdate(id,
+            {$addToSet:{bookmarkPostId:postId}}
+        );
+    }
+
+    async deleteBookmark(id:string, postId:string){
+        await this.verificationModel.findByIdAndUpdate(id, {
+            $pull:{bookmarkPostId:postId}
+        });
+    }
+
 
 }

@@ -4,7 +4,7 @@ import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags, ApiBody, ApiOkResponse,
 import { JwtAuthGuard } from 'src/auth/guard/auth.guard';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { UserUpdateDto } from './dto/user.update.dto';
-import { CommonResponses, UserResponse } from '../swagger/responses';
+import { CommonResponses, UserResponse, BookmarkResponses } from '../swagger/responses';
 import { UploadService } from 'src/upload/upload.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ImageValidationPipe } from 'src/upload/image-validation.pipe';
@@ -344,6 +344,105 @@ export class UserController {
         }
         const imageUrl = this.uploadService.uploadFile(file);
         return this.userService.uploadImage(id, imageUrl);
+    }
+
+    @ApiOperation({
+        summary: '북마크 게시글 조회',
+        description: '현재 로그인한 사용자가 북마크한 게시글 목록을 조회합니다.'
+    })
+    @ApiBearerAuth('access-token')
+    @ApiBody({
+        description: '조회할 게시글 ID',
+        schema: {
+            type: 'object',
+            properties: {
+                postId: {
+                    type: 'string',
+                    description: '게시글 ID',
+                    example: '507f1f77bcf86cd799439011'
+                }
+            }
+        }
+    })
+    @ApiOkResponse({
+        description: '북마크 게시글 조회 성공',
+        schema: BookmarkResponses.getBookmarksSuccess
+    })
+    @ApiResponse({
+        status: 401,
+        description: '인증 실패',
+        schema: CommonResponses.unauthorized
+    })
+    @UseGuards(JwtAuthGuard)
+    @Get('/bookmark')
+    async getBookmark(@CurrentUser()id : string, @Body() postId:string){
+        return await this.userService.getBookmark(id, postId);
+    }
+
+    @ApiOperation({
+        summary: '북마크 추가',
+        description: '현재 로그인한 사용자가 특정 게시글을 북마크에 추가합니다.'
+    })
+    @ApiBearerAuth('access-token')
+    @ApiBody({
+        description: '북마크할 게시글 ID',
+        schema: {
+            type: 'object',
+            properties: {
+                postId: {
+                    type: 'string',
+                    description: '게시글 ID',
+                    example: '507f1f77bcf86cd799439011'
+                }
+            }
+        }
+    })
+    @ApiOkResponse({
+        description: '북마크 추가 성공',
+        schema: BookmarkResponses.addBookmarkSuccess
+    })
+    @ApiResponse({
+        status: 401,
+        description: '인증 실패',
+        schema: CommonResponses.unauthorized
+    })
+    @UseGuards(JwtAuthGuard)
+    @Post('/bookmark')
+    async updateBookmark(@CurrentUser()id : string, @Body() postId:string){
+        return await this.userService.updateBookmark(id, postId);
+    }
+
+    @ApiOperation({
+        summary: '북마크 제거',
+        description: '현재 로그인한 사용자의 북마크에서 특정 게시글을 제거합니다.'
+    })
+    @ApiBearerAuth('access-token')
+    @ApiBody({
+        description: '제거할 게시글 ID',
+        schema: {
+            type: 'object',
+            properties: {
+                postId: {
+                    type: 'string',
+                    description: '게시글 ID',
+                    example: '507f1f77bcf86cd799439011'
+                }
+            }
+        }
+    })
+    @ApiOkResponse({
+        description: '북마크 제거 성공',
+        schema: BookmarkResponses.deleteBookmarkSuccess
+    })
+    @ApiResponse({
+        status: 401,
+        description: '인증 실패',
+        schema: CommonResponses.unauthorized
+    })
+    @UseGuards(JwtAuthGuard)
+    @Delete('/bookmark')
+    async deleteBookmark(@CurrentUser()id : string, @Body() postId:string){
+        return await this.userService.deleteBookmark(id, postId);
     }
 
 }

@@ -61,5 +61,10 @@ export class Verification {
         @ApiProperty({description:'프로필 이미지 경로'})
         @Prop()
         profileImageUrl:string;
+
+        @ApiProperty({description:'북마크'})
+        @Prop()
+        bookmarkPostId:string[];
+        
 }
 export const VerificationSchema = SchemaFactory.createForClass(Verification);
