@@ -191,10 +191,16 @@ export class UserService {
     }
 
     async getBookmark(id:string){
+        console.log('=== getBookmark service called ===');
+        console.log('User ID in service:', id);
+        
         const user = await this.verificationModel.findById(id).select('bookmarkPostId');
+        console.log("user found:", user);
+        
         if (!user)
             throw new NotFoundException();
         
+        console.log("bookmarkPostId:", user.bookmarkPostId);
         return user.bookmarkPostId;
     }
 

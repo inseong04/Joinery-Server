@@ -35,6 +35,8 @@ export class UserController {
     @UseGuards(JwtAuthGuard)
     @Get('')
     async getMyProfile(@CurrentUser() id: string){
+        console.log('=== getMyProfile called ===');
+        console.log('User ID:', id);
         return this.userService.getUserById(id);
     }
 
@@ -203,27 +205,45 @@ export class UserController {
     }
 
     @ApiOperation({
-        summary:'특정 사용자 정보 조회',
-        description: '사용자 ID(username)로 특정 사용자의 정보를 조회합니다.'
+        summary: '북마크 게시글 조회',
+        description: '현재 로그인한 사용자가 북마크한 게시글 목록을 조회합니다.'
     })
-    @ApiParam({
-        name:'id', 
-        type:'string',
-        description: '조회할 사용자의 ID',
-        example: '507f1f77bcf86cd799439011'
+    @ApiBearerAuth('access-token')
+    @ApiBody({
+        description: '조회할 게시글 ID',
+        schema: {
+            type: 'object',
+            properties: {
+                postId: {
+                    type: 'string',
+                    description: '게시글 ID',
+                    example: '507f1f77bcf86cd799439011'
+                }
+            }
+        }
     })
     @ApiOkResponse({
-        description: '사용자 정보 조회 성공',
-        schema: UserResponse
+        description: '북마크 게시글 조회 성공',
+        schema: BookmarkResponses.getBookmarksSuccess
     })
     @ApiResponse({
-        status: 404,
-        description: '사용자를 찾을 수 없음',
-        schema: CommonResponses.notFound
+        status: 401,
+        description: '인증 실패',
+        schema: CommonResponses.unauthorized
     })
-    @Get('/:id')
-    async getUser(@Param('id') id:string){
-        return this.userService.getUser(id);
+    @UseGuards(JwtAuthGuard)
+    @Get('/bookmark')
+    async getBookmark(@CurrentUser()id : string){
+        console.log('=== getBookmark called ===');
+        console.log('User ID:', id);
+        try {
+            const result = await this.userService.getBookmark(id);
+            console.log('Result:', result);
+            return result;
+        } catch (error) {
+            console.error('Error in getBookmark:', error);
+            throw error;
+        }
     }
 
     @ApiOperation({
@@ -347,39 +367,6 @@ export class UserController {
     }
 
     @ApiOperation({
-        summary: '북마크 게시글 조회',
-        description: '현재 로그인한 사용자가 북마크한 게시글 목록을 조회합니다.'
-    })
-    @ApiBearerAuth('access-token')
-    @ApiBody({
-        description: '조회할 게시글 ID',
-        schema: {
-            type: 'object',
-            properties: {
-                postId: {
-                    type: 'string',
-                    description: '게시글 ID',
-                    example: '507f1f77bcf86cd799439011'
-                }
-            }
-        }
-    })
-    @ApiOkResponse({
-        description: '북마크 게시글 조회 성공',
-        schema: BookmarkResponses.getBookmarksSuccess
-    })
-    @ApiResponse({
-        status: 401,
-        description: '인증 실패',
-        schema: CommonResponses.unauthorized
-    })
-    @UseGuards(JwtAuthGuard)
-    @Get('/bookmark')
-    async getBookmark(@CurrentUser()id : string){
-        return await this.userService.getBookmark(id);
-    }
-
-    @ApiOperation({
         summary: '북마크 추가',
         description: '현재 로그인한 사용자가 특정 게시글을 북마크에 추가합니다.'
     })
@@ -443,6 +430,30 @@ export class UserController {
     @Delete('/bookmark')
     async deleteBookmark(@CurrentUser()id : string, @Body() postId:string){
         return await this.userService.deleteBookmark(id, postId);
+    }
+
+    @ApiOperation({
+        summary:'특정 사용자 정보 조회',
+        description: '사용자 ID(username)로 특정 사용자의 정보를 조회합니다.'
+    })
+    @ApiParam({
+        name:'id', 
+        type:'string',
+        description: '조회할 사용자의 ID',
+        example: '507f1f77bcf86cd799439011'
+    })
+    @ApiOkResponse({
+        description: '사용자 정보 조회 성공',
+        schema: UserResponse
+    })
+    @ApiResponse({
+        status: 404,
+        description: '사용자를 찾을 수 없음',
+        schema: CommonResponses.notFound
+    })
+    @Get('/:id')
+    async getUser(@Param('id') id:string){
+        return this.userService.getUser(id);
     }
 
 }
