@@ -473,7 +473,7 @@ export class PostController {
         schema: CommonResponses.notFound
     })
     @Post('member/:postId')
-    async updateMember(@CurrentUser() id: string, @Param('postId') postId:string, userId:string){
+    async updateMember(@CurrentUser() id: string, @Param('postId') postId:string, @Body('userId')userId:string){
         return this.postService.updateMember(id, postId, userId);
     }
 
@@ -509,7 +509,7 @@ export class PostController {
         schema: CommonResponses.notFound
     })
     @Delete('member/:postId')
-    async deleteLikePostId(@CurrentUser() id: string, @Param('postId') postId:string, userId:string){
+    async deleteLikePostId(@CurrentUser() id: string, @Param('postId') postId:string, @Body('userId') userId:string){
         return this.postService.deleteLikePostId(id, postId, userId);   
     }
 

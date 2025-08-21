@@ -306,7 +306,7 @@ export class PostService {
             {$pull: {likePostId: postId}}
         );
 
-        return await this.PostModel.updateOne({_id: postId},
+        await this.PostModel.updateOne({_id: postId},
             {$pull: {likedUserId: userId}},
         );
     }
