@@ -200,7 +200,7 @@ export class UserService {
 
     async updateBookmark(id: string, postId:string){
         await this.verificationModel.findByIdAndUpdate(id,
-            {$addToSet:{bookmarkPostId:postId}}
+            {$addToSet:{bookmarkPostId:postId.toString()}}
         );
     }
 
