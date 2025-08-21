@@ -190,7 +190,7 @@ export class UserService {
         return { message: 'success', url: imageUrl};
     }
 
-    async getBookmark(id:string, postId:string){
+    async getBookmark(id:string){
         const user = await this.verificationModel.findById(id).select('bookmarkPostId');
         if (!user)
             throw new NotFoundException();

@@ -375,8 +375,8 @@ export class UserController {
     })
     @UseGuards(JwtAuthGuard)
     @Get('/bookmark')
-    async getBookmark(@CurrentUser()id : string, @Body() postId:string){
-        return await this.userService.getBookmark(id, postId);
+    async getBookmark(@CurrentUser()id : string){
+        return await this.userService.getBookmark(id);
     }
 
     @ApiOperation({
