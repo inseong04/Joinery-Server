@@ -9,10 +9,12 @@ import { MulterModule } from '@nestjs/platform-express';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { multerOptionsFactory } from 'src/config/multer.config';
 import { AuthModule } from 'src/auth/auth.module';
+import { NotificationsModule } from 'src/notifications/notifications.module';
 
 @Module({
   imports:[
     AuthModule,
+    NotificationsModule,
     MongooseModule.forFeature([{name: 'User', schema:VerificationSchema}, {name:'Post', schema:PostSchema}]),
     UploadModule,
     MulterModule.registerAsync({
