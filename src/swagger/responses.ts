@@ -538,3 +538,64 @@ export const BookmarkResponses = {
     }
   }
 };
+
+// 알림 응답 스키마
+export const NotificationResponses = {
+  // 단일 알림 스키마
+  notificationItem: {
+    type: 'object',
+    properties: {
+      _id: { type: 'string', example: '68a7f163fc0b3662344da79b' },
+      userId: { type: 'string', example: '68a7f10dfc0b3662344da77a' },
+      type: { 
+        type: 'string', 
+        enum: ['LIKE', 'LIKE_ACCEPTED', 'LIKE_REJECTED', 'MEMBER_JOINED'],
+        example: 'LIKE_REJECTED'
+      },
+      message: { 
+        type: 'string', 
+        example: '신청하신 \'서울 여행 동행 구합니다\' 동행이 거절되었어요'
+      },
+      meta: {
+        type: 'object',
+        properties: {
+          postId: { type: 'string', example: '68a7f12bfc0b3662344da77f' },
+          actorId: { type: 'string', example: '68a7f104fc0b3662344da774' },
+          postTitle: { type: 'string', example: '서울 여행 동행 구합니다' },
+          name: { type: 'string', example: '팀장A' }
+        }
+      },
+      readAt: { type: 'string', nullable: true, example: null },
+      isRead: { type: 'boolean', example: false },
+      createdAt: { type: 'string', example: '2025-08-22T04:26:11.917Z' },
+      updatedAt: { type: 'string', example: '2025-08-22T04:26:11.917Z' }
+    }
+  },
+
+  // 알림 목록 응답 스키마
+  notificationList: {
+    type: 'array',
+    items: { $ref: '#/components/schemas/NotificationItem' }
+  },
+
+  // 알림 읽음 처리 성공 응답
+  readSuccess: {
+    type: 'object',
+    properties: {
+      message: { type: 'string', example: 'success' }
+    }
+  },
+
+  // 알림 읽음 처리 요청 스키마
+  readRequest: {
+    type: 'object',
+    properties: {
+      id: {
+        type: 'string',
+        description: '읽음 처리할 알림의 ID',
+        example: '68a7f163fc0b3662344da79b'
+      }
+    },
+    required: ['id']
+  }
+};

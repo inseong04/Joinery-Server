@@ -295,6 +295,19 @@ export class PostService {
             throw new BadRequestException();   
     }
 
+    private async createNotificationForMember(postId:string, userId:string, memberId:string[]){
+        memberId.forEach(async item => {
+            await this.notifications.create({
+                userId:item,
+                type:NotificationType.MEMBER_JOINED,
+                meta:{
+                    postId:postId,
+                    actorId:userId
+                }
+            });
+        });
+    }
+
     async updateMember(id:string , postId:string, userId:string){
         await this.checkAuthor(id, postId);
 
@@ -302,18 +315,31 @@ export class PostService {
             {$addToSet: {joinPostId: postId}}
         );
 
-        const post = await this.PostModel.findById(postId).select('maxPerson currentPerson');
+        const post = await this.PostModel.findById(postId).select('maxPerson currentPerson authorId memberId');
         if (post == undefined)
             throw new NotFoundException();
         
         const newCurrentPerson = post.currentPerson + 1;
-        if  (post.maxPerson > newCurrentPerson)
+        if  (newCurrentPerson > post.maxPerson)
             throw new BadRequestException();
+
+        await this.notifications.create({
+            userId: userId,
+            type: NotificationType.LIKE_ACCEPTED,
+            meta: {
+                postId:postId,
+                actorId: id
+            }
+        });
+
+        this.createNotificationForMember(postId, userId, post.memberId);
 
         return await this.PostModel.updateOne({_id:postId},
             {$addToSet: {memberId: userId}},
             {currentPerson: newCurrentPerson}
         );
+
+        
     }
 
     async deleteLikePostId(id: string, postId:string, userId:string) {
@@ -325,6 +351,15 @@ export class PostService {
         await this.PostModel.updateOne({_id: postId},
             {$pull: {likedUserId: userId}},
         );
+
+        await this.notifications.create({
+            userId:userId,
+            type:NotificationType.LIKE_REJECTED,
+            meta:{
+                postId:postId,
+                actorId:id
+            }
+        });
     }
 
     async deleteMember(id: string, postId:string, userId:string){

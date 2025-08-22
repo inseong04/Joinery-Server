@@ -38,8 +38,8 @@ export type NotificationMetaMap = {
 }
 
 export const TEMPLATES: Record<NotificationType, string> ={
-    [NotificationType.LIKE]:'{{name}} 님이 {{postTitle}} 동행에 동행을 요청했어요.',
-    [NotificationType.LIKE_ACCEPTED]:'신청하신 {{postTitle}} 동행이 수락되었어요',
-    [NotificationType.LIKE_REJECTED]:'신청하신 {{postTitle}} 동행이 거절되었어요',
-    [NotificationType.MEMBER_JOINED]:'참가하신 {{postTitle}} 동행에 {{name}} 님이 참가했어요',
+    [NotificationType.LIKE]:'{{name}} 님이 \'{{postTitle}}\' 동행에 동행을 요청했어요.',
+    [NotificationType.LIKE_ACCEPTED]:'신청하신 \'{{postTitle}}\' 동행이 수락되었어요',
+    [NotificationType.LIKE_REJECTED]:'신청하신 \'{{postTitle}}\' 동행이 거절되었어요',
+    [NotificationType.MEMBER_JOINED]:'참가하신 \'{{postTitle}}\' 동행에 {{name}} 님이 참가했어요',
 };

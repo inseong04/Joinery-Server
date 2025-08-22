@@ -12,13 +12,13 @@ async function bootstrap() {
     const options = new DocumentBuilder()
     .setTitle('Joinery API')
     .setDescription('여행 커뮤니티 플랫폼 Joinery의 REST API 문서')
-    .setVersion('0.5')
+    .setVersion('1.0')
     .addServer('http://localhost:3000/', 'Local environment')
-    .addServer('https://staging.yourapi.com/', 'Staging')
-    .addServer('https://production.yourapi.com/', 'Production')
+    .addServer('https://port-0-joinery-md0easjwbfa8cb98.sel5.cloudtype.app/', 'Production')
     .addTag('Auth', '사용자 인증 관련 API')
     .addTag('User', '사용자 정보 관리 API')
     .addTag('Post', '게시글 관리 API')
+    .addTag('Notifications', '알림 관리 API')
     .addBearerAuth({
         type: 'http',
         scheme: 'bearer',
