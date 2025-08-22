@@ -35,6 +35,8 @@ export class UserController {
     @UseGuards(JwtAuthGuard)
     @Get('')
     async getMyProfile(@CurrentUser() id: string){
+        console.log('=== getMyProfile called ===');
+        console.log('User ID:', id);
         return this.userService.getUserById(id);
     }
 
@@ -407,7 +409,6 @@ export class UserController {
     async deleteBookmark(@CurrentUser()id : string, @Body('postId') postId:string){
         return await this.userService.deleteBookmark(id, postId);
     }
-
 
     @ApiOperation({
         summary:'특정 사용자 정보 조회',

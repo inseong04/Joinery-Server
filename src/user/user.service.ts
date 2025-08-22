@@ -195,6 +195,8 @@ export class UserService {
 
     async getBookmark(id:string){
         const user = await this.verificationModel.findById(id).select('bookmarkPostId');
+        console.log("user found:", user);
+        
         if (!user)
             throw new NotFoundException();
                 
@@ -233,7 +235,7 @@ export class UserService {
 
     async updateBookmark(id: string, postId:string){
         await this.verificationModel.findByIdAndUpdate(id,
-            {$addToSet:{bookmarkPostId:postId}}
+            {$addToSet:{bookmarkPostId:postId.toString()}}
         );
     }
 
