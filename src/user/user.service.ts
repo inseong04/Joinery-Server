@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { Verification } from 'src/auth/schema/verification.schema';
@@ -11,13 +11,16 @@ import { UserPostModel } from './model/user.post.model';
 import { PostGetDto } from 'src/post/dto/post.get.dto';
 import { UserWrotePostModel } from './model/user.wrote.post.model';
 import { UploadService } from 'src/upload/upload.service';
+import { NotificationsService } from 'src/notifications/notifications.service';
+import { NotificationMetaMap, NotificationType, TEMPLATES } from '../notifications/types/notifications.types';
 
 @Injectable()
 export class UserService {
     constructor(
         @InjectModel('Post') private postModel:Model<PostSchema>,
         @InjectModel('User') private verificationModel: Model<Verification & Document>,
-        private uploadService: UploadService
+        private uploadService: UploadService,
+        private readonly notificationsService: NotificationsService,
     ){}
 
     async getUser(username:string){
@@ -190,12 +193,42 @@ export class UserService {
         return { message: 'success', url: imageUrl};
     }
 
-    async getBookmark(id:string, postId:string){
+    async getBookmark(id:string){
         const user = await this.verificationModel.findById(id).select('bookmarkPostId');
         if (!user)
             throw new NotFoundException();
+                
+        const bookmarkPostIdList = user.bookmarkPostId;
+        if (!bookmarkPostIdList || bookmarkPostIdList.length === 0) {
+            return [];
+        }
         
-        return user.bookmarkPostId;
+        const bookmarkPosts: UserWrotePostModel[] = [];
+        for (const item of bookmarkPostIdList) {
+            const post = await this.postModel.findById(item);
+            
+            if (post == null) {
+                console.log('Post is null, skipping');
+                continue; // 삭제된 게시글은 건너뛰기
+            }
+            
+            const bookmarkPost: UserWrotePostModel = new UserWrotePostModel();
+            bookmarkPost._id = post?._id ? post._id.toString() : null;
+            bookmarkPost.region_id = post?.region_id ? post.region_id : null;
+            
+            const author = await this.verificationModel.findById(post?.authorId).select('nickname').lean();
+            
+            bookmarkPost.startDate = post?.startDate ? DateUtils.formatDate(post.startDate) : null;
+            bookmarkPost.endDate = post?.endDate ? DateUtils.formatDate(post.endDate) : null;
+            bookmarkPost.MaxPerson = post?.maxPerson ?? 0;
+            bookmarkPost.currentPerson = post?.currentPerson ?? 404;
+            bookmarkPost.title = post?.title ?? 'Title';
+            
+            const now = new Date();
+            bookmarkPosts.push(bookmarkPost);
+        }
+        
+        return bookmarkPosts;
     }
 
     async updateBookmark(id: string, postId:string){
@@ -210,5 +243,24 @@ export class UserService {
         });
     }
 
+     async createNotification(type:NotificationType, userId: string, postId:string){
+        let meta;
+        if (type=NotificationType.LIKE){
+            meta = {postId, actorId:userId};
+        } else if (NotificationType.LIKE_ACCEPTED){
+            meta = {postId};
+        } else if (NotificationType.LIKE_REJECTED){
+            meta = {postId};
+        } else if (NotificationType.MEMBER_JOINED){
+            meta = {postId, actorId:userId};
+        } else {
+            throw new BadRequestException();
+        }
+         await this.notificationsService.create({
+            type:type,
+            userId:userId,
+            meta: meta
+         });
+     }
 
 }

@@ -1,6 +1,6 @@
 import { Controller, Delete, Get, Param, Patch, UseGuards, Body, Post, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
 import { UserService } from './user.service';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags, ApiBody, ApiOkResponse, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags, ApiBody, ApiOkResponse, ApiResponse, ApiProperty } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guard/auth.guard';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { UserUpdateDto } from './dto/user.update.dto';
@@ -203,30 +203,6 @@ export class UserController {
     }
 
     @ApiOperation({
-        summary:'특정 사용자 정보 조회',
-        description: '사용자 ID(username)로 특정 사용자의 정보를 조회합니다.'
-    })
-    @ApiParam({
-        name:'id', 
-        type:'string',
-        description: '조회할 사용자의 ID',
-        example: '507f1f77bcf86cd799439011'
-    })
-    @ApiOkResponse({
-        description: '사용자 정보 조회 성공',
-        schema: UserResponse
-    })
-    @ApiResponse({
-        status: 404,
-        description: '사용자를 찾을 수 없음',
-        schema: CommonResponses.notFound
-    })
-    @Get('/:id')
-    async getUser(@Param('id') id:string){
-        return this.userService.getUser(id);
-    }
-
-    @ApiOperation({
         summary:'관심지역 수정',
         description: '현재 로그인한 사용자의 관심지역 목록을 수정합니다.'
     })
@@ -351,19 +327,6 @@ export class UserController {
         description: '현재 로그인한 사용자가 북마크한 게시글 목록을 조회합니다.'
     })
     @ApiBearerAuth('access-token')
-    @ApiBody({
-        description: '조회할 게시글 ID',
-        schema: {
-            type: 'object',
-            properties: {
-                postId: {
-                    type: 'string',
-                    description: '게시글 ID',
-                    example: '507f1f77bcf86cd799439011'
-                }
-            }
-        }
-    })
     @ApiOkResponse({
         description: '북마크 게시글 조회 성공',
         schema: BookmarkResponses.getBookmarksSuccess
@@ -375,8 +338,8 @@ export class UserController {
     })
     @UseGuards(JwtAuthGuard)
     @Get('/bookmark')
-    async getBookmark(@CurrentUser()id : string, @Body() postId:string){
-        return await this.userService.getBookmark(id, postId);
+    async getBookmark(@CurrentUser()id : string){
+        return await this.userService.getBookmark(id);
     }
 
     @ApiOperation({
@@ -408,7 +371,7 @@ export class UserController {
     })
     @UseGuards(JwtAuthGuard)
     @Post('/bookmark')
-    async updateBookmark(@CurrentUser()id : string, @Body() postId:string){
+    async updateBookmark(@CurrentUser()id : string, @Body('postId') postId:string){
         return await this.userService.updateBookmark(id, postId);
     }
 
@@ -441,8 +404,33 @@ export class UserController {
     })
     @UseGuards(JwtAuthGuard)
     @Delete('/bookmark')
-    async deleteBookmark(@CurrentUser()id : string, @Body() postId:string){
+    async deleteBookmark(@CurrentUser()id : string, @Body('postId') postId:string){
         return await this.userService.deleteBookmark(id, postId);
+    }
+
+
+    @ApiOperation({
+        summary:'특정 사용자 정보 조회',
+        description: '사용자 ID(username)로 특정 사용자의 정보를 조회합니다.'
+    })
+    @ApiParam({
+        name:'id', 
+        type:'string',
+        description: '조회할 사용자의 ID',
+        example: '507f1f77bcf86cd799439011'
+    })
+    @ApiOkResponse({
+        description: '사용자 정보 조회 성공',
+        schema: UserResponse
+    })
+    @ApiResponse({
+        status: 404,
+        description: '사용자를 찾을 수 없음',
+        schema: CommonResponses.notFound
+    })
+    @Get('/:id')
+    async getUser(@Param('id') id:string){
+        return this.userService.getUser(id);
     }
 
 }

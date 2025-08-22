@@ -13,12 +13,15 @@ import DateUtils from 'src/utils/date.utill';
 import { UsersInformationModel } from './model/users-information.model';
 import { AuthorModel } from './model/author.model';
 import { Schedule } from './model/schedule.model';
+import { NotificationsService } from 'src/notifications/notifications.service';
+import { NotificationType } from 'src/notifications/types/notifications.types';
 
 @Injectable()
 export class PostService {
     constructor(
         @InjectModel('Post') private PostModel:Model<PostSchema>, 
         @InjectModel('User') private verificationModel:Model<Verification>,
+        private readonly notifications: NotificationsService,
     ){}
 
     async getRegionPost(regionId:number, findRegionDto: FindRegionDto){
@@ -173,11 +176,24 @@ export class PostService {
 
     async updateLike(id: string, userId: string){
         const post = await this.PostModel.findById(id).select('authorId');
+        
+        if (!post || !post.authorId)
+            throw new NotFoundException();
+
         if(post?.authorId == userId)
             throw new BadRequestException();
 
         await this.PostModel.findByIdAndUpdate(id, {$addToSet: {likedUserId: userId}},{new: true});
         await this.verificationModel.findByIdAndUpdate(userId, {$addToSet: {likePostId: id}}, {new:true});
+        
+        await this.notifications.create({
+            userId: post.authorId,
+            type: NotificationType.LIKE,
+            meta: {
+                postId:id,
+                actorId: userId
+            },
+        });
         return {isLike:true};
     }
 
