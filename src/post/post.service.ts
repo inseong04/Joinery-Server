@@ -344,7 +344,7 @@ export class PostService {
 
         return await this.PostModel.updateOne({_id:postId},
             {$addToSet: {memberId: userId}},
-            {currentPerson: newCurrentPerson}
+            {$set: {currentPerson: newCurrentPerson}}
         );
 
         
