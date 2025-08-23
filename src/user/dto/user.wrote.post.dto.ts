@@ -1,4 +1,4 @@
-export class UserWrotePostModel{
+export class UserWrotePostDto{
     _id:string|null;
     region_id:number|null;
     startDate:string|null;

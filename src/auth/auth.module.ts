@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { VerificationSchema } from './schema/verification.schema';
+import { UserSchema } from './schema/user.schema';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './guard/jwt.strategy';
 import { GoogleStrategy } from './guard/google/google.strategy';
@@ -16,7 +16,7 @@ import { mailVerificationSchema } from './schema/mail-verification.schema';
     MailerModule.forRootAsync(new mailerConfig()),
     ConfigModule,
     MongooseModule.forFeature([
-      { name: 'User', schema: VerificationSchema},
+      { name: 'User', schema: UserSchema},
       { name: 'MailVerification', schema: mailVerificationSchema},
     ]),
     JwtModule.registerAsync({

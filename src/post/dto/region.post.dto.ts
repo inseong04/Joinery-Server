@@ -1,4 +1,4 @@
-export class RegionPost {
+export class RegionPostDto {
     id:string;
     authorId:string;
     title:string;

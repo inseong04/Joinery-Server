@@ -1,24 +1,21 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
-import { Verification } from 'src/auth/schema/verification.schema';
-import { Region } from 'src/constants/region-list.constant';
+import { User } from 'src/auth/schema/user.schema';
 import { UserUpdateDto } from './dto/user.update.dto';
 import { PostSchema } from 'src/post/schema/post.schema';
-import { ApplicationPostModel } from './model/application.post.model';
 import DateUtils from 'src/utils/date.utill';
-import { UserPostModel } from './model/user.post.model';
-import { PostGetDto } from 'src/post/dto/post.get.dto';
-import { UserWrotePostModel } from './model/user.wrote.post.model';
+import { UserPostDto } from './dto/user.post.dto';
+import { UserWrotePostDto } from './dto/user.wrote.post.dto';
 import { UploadService } from 'src/upload/upload.service';
 import { NotificationsService } from 'src/notifications/notifications.service';
-import { NotificationMetaMap, NotificationType, TEMPLATES } from '../notifications/types/notifications.types';
+import { NotificationType, TEMPLATES } from '../notifications/types/notifications.types';
 
 @Injectable()
 export class UserService {
     constructor(
         @InjectModel('Post') private postModel:Model<PostSchema>,
-        @InjectModel('User') private verificationModel: Model<Verification & Document>,
+        @InjectModel('User') private verificationModel: Model<User & Document>,
         private uploadService: UploadService,
         private readonly notificationsService: NotificationsService,
     ){}
@@ -94,11 +91,11 @@ export class UserService {
             return {};
         }
 
-        const endedLikedPosts: UserPostModel[] = [];
-        const likedPosts: UserPostModel[]= [];
+        const endedLikedPosts: UserPostDto[] = [];
+        const likedPosts: UserPostDto[]= [];
         for (const item of likedPostIdList) {
             const post = await this.postModel.findById(item);
-            const likedPost : UserPostModel = new UserPostModel();
+            const likedPost : UserPostDto = new UserPostDto();
             likedPost._id = post?._id ? post._id.toString() : null;
             likedPost.region_id = post?.region_id ? post.region_id : null;
             const author = await this.verificationModel.findById(post?.authorId).select('nickname').lean();
@@ -124,12 +121,12 @@ export class UserService {
             return {};
         }
 
-        const endedWrotePosts: UserWrotePostModel[] = [];
-        const wrotePosts: UserWrotePostModel[] = [];
+        const endedWrotePosts: UserWrotePostDto[] = [];
+        const wrotePosts: UserWrotePostDto[] = [];
         for (const item of wrotePostIdList) {
             const post = await this.postModel.findById(item);
             if (post == null) continue; // 삭제된 게시글은 건너뛰기
-            const wrotePost: UserWrotePostModel = new UserWrotePostModel();
+            const wrotePost: UserWrotePostDto = new UserWrotePostDto();
             wrotePost._id = post?._id ? post._id.toString() : null;
             wrotePost.region_id = post?.region_id ? post.region_id : null;
             const author = await this.verificationModel.findById(post?.authorId).select('nickname').lean();
@@ -205,7 +202,7 @@ export class UserService {
             return [];
         }
         
-        const bookmarkPosts: UserWrotePostModel[] = [];
+        const bookmarkPosts: UserWrotePostDto[] = [];
         for (const item of bookmarkPostIdList) {
             const post = await this.postModel.findById(item);
             
@@ -214,7 +211,7 @@ export class UserService {
                 continue; // 삭제된 게시글은 건너뛰기
             }
             
-            const bookmarkPost: UserWrotePostModel = new UserWrotePostModel();
+            const bookmarkPost: UserWrotePostDto = new UserWrotePostDto();
             bookmarkPost._id = post?._id ? post._id.toString() : null;
             bookmarkPost.region_id = post?.region_id ? post.region_id : null;
             

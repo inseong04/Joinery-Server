@@ -4,13 +4,13 @@ import { JwtAuthGuard } from '../auth/guard/auth.guard';
 import { PostCreateDto } from './dto/post.create.dto';
 import { PostSchema } from './schema/post.schema';
 import { PostService } from './post.service';
-import { DetailPost } from './model/detail.post.model';
-import { RegionPost } from './model/region.post.model';
+import { DetailPostDto } from './dto/detail.post.dto';
+import { RegionPostDto } from './dto/region.post.dto';
 import { FindRegionDto } from './dto/find.region.dto';
 import { isValidObjectId } from 'mongoose';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { CommonResponses, PostDetailResponse, PopularRegionsResponse, PostListResponse, LikeResponse, DeletePostResponse, MemberResponses } from '../swagger/responses';
-import { PreviewPostModel } from './model/preview.post.model';
+import { PreviewPostDto } from './dto/preview.post.model';
 import { OptionalJwtAuthGuard } from 'src/auth/guard/optional-auth.guard';
 
 @ApiTags('Post')
@@ -46,7 +46,7 @@ export class PostController {
     @ApiBearerAuth('access-token')
     @UseGuards(OptionalJwtAuthGuard)
     @Get('/:id')
-    async getOne(@Param('id') id:string, @CurrentUser() userId: string) : Promise<DetailPost | null>{
+    async getOne(@Param('id') id:string, @CurrentUser() userId: string) : Promise<DetailPostDto | null>{
         if (!isValidObjectId(id)) {
             return null;
         }
@@ -146,7 +146,7 @@ export class PostController {
         schema: PostListResponse
     })
     @Get('/region/:id')
-    async getRegion(@Param('id') regionId : number, @Query() findRegionDto: FindRegionDto): Promise<RegionPost[]>{
+    async getRegion(@Param('id') regionId : number, @Query() findRegionDto: FindRegionDto): Promise<RegionPostDto[]>{
         return this.postService.getRegionPost(regionId, findRegionDto) as any;
     }
 
@@ -377,7 +377,7 @@ export class PostController {
         @Param('id') id: string,
         @Body() updateDto: any,
         @CurrentUser() userId: string
-    ): Promise<DetailPost | null> {
+    ): Promise<DetailPostDto | null> {
         // 권한 체크 등은 필요시 추가
         return this.postService.updatePost(id, updateDto, userId);
     }
@@ -431,13 +431,13 @@ export class PostController {
     })
     @ApiOkResponse({
         description: '지역 게시글 목록 조회 성공',
-        type: [PreviewPostModel]
+        type: [PreviewPostDto]
     })
     @Get('region')
     async getRegionPost(
         @Query('regionId') regionId: number,
         @Query() findRegionDto: FindRegionDto
-    ): Promise<PreviewPostModel[]> {
+    ): Promise<PreviewPostDto[]> {
         return this.postService.getRegionPost(regionId, findRegionDto);
     }
 

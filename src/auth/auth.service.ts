@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Verification } from './schema/verification.schema';
+import { User } from './schema/user.schema';
 import { SignUpDto } from './dto/signup.dto';
 import DateUtils from 'src/utils/date.utill';
 import * as bcrypt from 'bcrypt';
@@ -9,7 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { SignInDto } from './dto/signin.dto';
 import { ConfigService } from '@nestjs/config';
 import { Profile } from 'src/types/passport';
-import { UserDataModel } from './model/user-data.model';
+import { UserData } from './interfaces/user-data.interface';
 import { Gender } from 'src/constants/user.constants';
 import { MailerService } from '@nestjs-modules/mailer';
 import { getRandomSixDigitString } from 'src/utils/random-num';
@@ -20,15 +20,15 @@ export class AuthService {
     private readonly logger = new Logger(AuthService.name);
 
     constructor(
-        @InjectModel('User') private verificationModel:Model<Verification>,   
-        @InjectModel('MailVerification') private mailVerificationModel:Model<mailVerification>,
+        @InjectModel('User') private UserModel:Model<User>,   
+        @InjectModel('MailVerification') private MailVerificationModel:Model<mailVerification>,
         private jwtService:JwtService,
         private readonly mailerService: MailerService,
     ) {}
 
     async validateUser(signInDto: SignInDto): Promise<{accessToken: string} | undefined> {
 
-        const user = await this.verificationModel.findOne({ username: signInDto.username }).select('+password');
+        const user = await this.UserModel.findOne({ username: signInDto.username }).select('+password');
         if (!user) throw new NotFoundException();
 
         if (user?.provider == 'local') {
@@ -46,9 +46,9 @@ export class AuthService {
 
 
     
-    async create(signUpDto: SignUpDto): Promise<Verification> {
+    async create(signUpDto: SignUpDto): Promise<User> {
         // username 중복 체크
-        const existingUser = await this.verificationModel.findOne({ username: signUpDto.username });
+        const existingUser = await this.UserModel.findOne({ username: signUpDto.username });
         if (existingUser) {
             throw new Error('이미 존재하는 아이디입니다.');
         }
@@ -65,7 +65,7 @@ export class AuthService {
         signUpDto.bookmarkPostId = [];
         signUpDto.profileImageUrl = process.env.DEFAULT_PROFILE_IMAGE_URL!;
         
-        const createUser = new this.verificationModel(signUpDto);
+        const createUser = new this.UserModel(signUpDto);
         const savedUser = await createUser.save();
         
         // birthDate를 string으로 변환하여 응답
@@ -89,20 +89,20 @@ export class AuthService {
             },
         });
 
-        const verification = await this.mailVerificationModel.findOne({email:email});
+        const verification = await this.MailVerificationModel.findOne({email:email});
         if (verification)
             throw new BadRequestException();
 
         const newVerification = new MailVerificationDto();
         newVerification.email = email;
         newVerification.verificationCode = verificationCode;
-        const createVerification = new this.mailVerificationModel(newVerification);
+        const createVerification = new this.MailVerificationModel(newVerification);
 
         await createVerification.save();
     }
 
     async verifyMail(email:string, verificationCode: string){ 
-        const verification = await this.mailVerificationModel.findOne({email:email});
+        const verification = await this.MailVerificationModel.findOne({email:email});
 
         if (!verification)
             throw new NotFoundException();
@@ -110,24 +110,24 @@ export class AuthService {
         if (verification.verificationCode != verificationCode)
             throw new BadRequestException();
 
-        await this.mailVerificationModel.deleteOne({email:email});
+        await this.MailVerificationModel.deleteOne({email:email});
     }
 
     async updatePassword(id: string, password: string){
-        const provider = await this.verificationModel.findById(id).select('provider');
+        const provider = await this.UserModel.findById(id).select('provider');
         if (provider!.provider == 'google')
             throw new BadRequestException();
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        await this.verificationModel.findByIdAndUpdate(id, 
+        await this.UserModel.findByIdAndUpdate(id, 
             {$set: {password: hashedPassword} },
             {new: false}
         );
         return {message:'success'};
     }
 
-    async findOrCreateUserByGoogle(profile: Profile, userData?: UserDataModel){
-        const user = await this.verificationModel.findOne({username:profile.id});
+    async findOrCreateUserByGoogle(profile: Profile, userData?: UserData){
+        const user = await this.UserModel.findOne({username:profile.id});
 
         if(user) {
             return user;
@@ -164,13 +164,13 @@ export class AuthService {
         newUser.profileImageUrl = process.env.DEFAULT_PROFILE_IMAGE_URL!;
         newUser.provider = 'google';
 
-        const createUser = new this.verificationModel(newUser);
+        const createUser = new this.UserModel(newUser);
 
         return await createUser.save();
     }
 
     async deleteUser(id: string) {
-        await this.verificationModel.deleteOne({_id: id});
+        await this.UserModel.deleteOne({_id: id});
 
         return {message:"success"};
     }

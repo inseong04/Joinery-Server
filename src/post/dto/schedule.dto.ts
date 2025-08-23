@@ -1,7 +1,7 @@
 import { IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 
-export class Schedule {
+export class ScheduleDto {
     @ApiProperty({
         description: '일정 제목',
         example: '첫째 날 - 제주도 도착'

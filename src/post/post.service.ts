@@ -3,16 +3,16 @@ import { PostCreateDto } from './dto/post.create.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { newPostSchema, PostSchema } from './schema/post.schema';
-import { DetailPost } from './model/detail.post.model';
+import { DetailPostDto } from './dto/detail.post.dto';
 import { FindRegionDto } from './dto/find.region.dto';
-import { Verification } from 'src/auth/schema/verification.schema';
+import { User } from 'src/auth/schema/user.schema';
 import { isHeartDto } from './dto/isHeart.dto';
 import { HeartType } from 'src/constants/user.constants';
-import { PreviewPostModel } from './model/preview.post.model';
+import { PreviewPostDto } from './dto/preview.post.model';
 import DateUtils from 'src/utils/date.utill';
-import { UsersInformationModel } from './model/users-information.model';
-import { AuthorModel } from './model/author.model';
-import { Schedule } from './model/schedule.model';
+import { UsersInformationDto } from './dto/users-information.dto';
+import { Author } from './interfaces/author.model';
+import { ScheduleDto } from './dto/schedule.dto';
 import { NotificationsService } from 'src/notifications/notifications.service';
 import { NotificationType } from 'src/notifications/types/notifications.types';
 
@@ -20,21 +20,22 @@ import { NotificationType } from 'src/notifications/types/notifications.types';
 export class PostService {
     constructor(
         @InjectModel('Post') private PostModel:Model<PostSchema>, 
-        @InjectModel('User') private verificationModel:Model<Verification>,
+        @InjectModel('User') private UserModel:Model<User>,
         private readonly notifications: NotificationsService,
     ){}
 
     async getRegionPost(regionId:number, findRegionDto: FindRegionDto){
-    let result: PreviewPostModel[] = [];
+    let result: PreviewPostDto[] = [];
     //시작날짜 끝나는날짜 미입력시
     if (findRegionDto.startDate == null && findRegionDto.endDate == null) {
             const posts = await this.PostModel.find({region_id: regionId}).select('title startDate endDate limitedHeart heart createdAt authorId currentPerson maxPerson').lean();
-            const postList: PreviewPostModel[] = await Promise.all(posts.map(async item => {
-                const user = await this.verificationModel.findById(item.authorId).select('nickname username profileImageUrl').lean();
-                const author : AuthorModel = new AuthorModel();
-                author.nickname = user?.nickname ?? 'Unknown';
-                author.username = user?.username ?? 'Unknown';
-                author.profileImageUrl = user?.profileImageUrl ?? process.env.DEFAULT_PROFILE_IMAGE_URL!;
+            const postList: PreviewPostDto[] = await Promise.all(posts.map(async item => {
+                const user = await this.UserModel.findById(item.authorId).select('nickname username profileImageUrl').lean();
+                const author : Author = {
+                nickname : user?.nickname ?? 'Unknown',
+                username : user?.username ?? 'Unknown',
+                profileImageUrl : user?.profileImageUrl ?? process.env.DEFAULT_PROFILE_IMAGE_URL!
+                }
                 return {
                     _id: item._id.toString(),
                     title: item.title,
@@ -52,9 +53,13 @@ export class PostService {
         const filterStartDate = new Date(findRegionDto.startDate);
         const filterEndDate = new Date(findRegionDto.endDate);
         const posts = await this.PostModel.find({region_id:regionId, startDate:{$gte: filterStartDate}, endDate:{$lte:filterEndDate} });
-        const postList: PreviewPostModel[] = await Promise.all(posts.map(async item => {
-                const user = await this.verificationModel.findById(item.authorId).select('nickname username profileImageUrl').lean();
-                const author : AuthorModel = new AuthorModel();            
+        const postList: PreviewPostDto[] = await Promise.all(posts.map(async item => {
+                const user = await this.UserModel.findById(item.authorId).select('nickname username profileImageUrl').lean();
+                const author : Author = {
+                    nickname : user?.nickname ?? 'Unknown',
+                    username : user?.username ?? 'Unknown',
+                    profileImageUrl : user?.profileImageUrl ?? process.env.DEFAULT_PROFILE_IMAGE_URL!
+                    }    
                 return {
                 _id:item._id.toString(),
                 title: item.title,
@@ -70,19 +75,19 @@ export class PostService {
     return result;
     }
 
-    async getPost(id : string, userId:string): Promise<DetailPost | null>{
+    async getPost(id : string, userId:string): Promise<DetailPostDto | null>{
         const post = await this.PostModel.findById(id).lean();
         if (!post) throw new NotFoundException();
-        const authorInformation = await this.verificationModel.findById(post.authorId).select('nickname username profileImageUrl').lean();
-        const author: AuthorModel = new AuthorModel();
-        author.nickname = authorInformation?.nickname ??'Unknown';
-        author.username = authorInformation?.username ?? 'Unknown';
-        author.profileImageUrl = authorInformation?.profileImageUrl ?? process.env.DEFAULT_PROFILE_IMAGE_URL!;
-
-        const members: UsersInformationModel[] = await Promise.all(
+        const authorInformation = await this.UserModel.findById(post.authorId).select('nickname username profileImageUrl').lean();
+        const author: Author = {
+        nickname : authorInformation?.nickname ??'Unknown',
+        username : authorInformation?.username ?? 'Unknown',
+        profileImageUrl : authorInformation?.profileImageUrl ?? process.env.DEFAULT_PROFILE_IMAGE_URL!
+        }
+        const members: UsersInformationDto[] = await Promise.all(
             post.memberId.map(async id => {
-                const user = await this.verificationModel.findById(id).select('nickname username profileImageUrl _id').lean();
-                const someMember = new UsersInformationModel();
+                const user = await this.UserModel.findById(id).select('nickname username profileImageUrl _id').lean();
+                const someMember = new UsersInformationDto();
                 someMember._id = user?._id.toString() ?? 'Unknown';
                 someMember.nickname = user?.nickname ?? 'Unknown';
                 someMember.username = user?.username ?? 'Unknown';
@@ -92,7 +97,7 @@ export class PostService {
             })
         );
 
-        const schedules : Schedule[] = post.schedule.map(item => {
+        const schedules : ScheduleDto[] = post.schedule.map(item => {
             return {
                 ...item,
                 date: DateUtils.formatDate(item.date),
@@ -101,7 +106,7 @@ export class PostService {
 
         // 토큰 있을시 (userId가 유효한 문자열인 경우)
         if (userId && typeof userId === 'string' && userId.trim() !== '') {
-            const user = await this.verificationModel.findById(userId).select('')
+            const user = await this.UserModel.findById(userId).select('')
             if (!user) throw new NotFoundException();
             // 아무도 하트X-> 아무데도 등록X heartType 0
             // 유저만 하트 -> (users) likePostId에 postId등록, (post) likedUserId에 userId 등록, (post)memberId에는 등록X
@@ -119,10 +124,10 @@ export class PostService {
             // 조회 이용자가 게시글 작성자인지 판별
             if (user._id.toString() == post.authorId) {
                 // 게시글 작성자일시
-                const likedUsers: UsersInformationModel[] = await Promise.all(
+                const likedUsers: UsersInformationDto[] = await Promise.all(
                     post.likedUserId.map(async id => {
-                        const user = await this.verificationModel.findById(id).select('nickname username profileImageUrl _id').lean();
-                        const someUser = new UsersInformationModel();
+                        const user = await this.UserModel.findById(id).select('nickname username profileImageUrl _id').lean();
+                        const someUser = new UsersInformationDto();
                         someUser._id = user?._id.toString() ?? 'Unknown';
                         someUser.nickname = user?.nickname ?? 'Unknown';
                         someUser.username = user?.username ?? 'Unknown';
@@ -141,7 +146,7 @@ export class PostService {
                     members: members,
                     schedule: schedules,
                     likedUsers
-                } as unknown as DetailPost;
+                } as unknown as DetailPostDto;
             } 
 
             else {
@@ -154,7 +159,7 @@ export class PostService {
                     author: author,
                     members: members,
                     schedule: schedules,  
-                } as unknown as DetailPost;
+                } as unknown as DetailPostDto;
             }
             
         } else { // 토큰 없을시
@@ -170,7 +175,7 @@ export class PostService {
                 author: author,
                 members: members,
                 schedule: schedules,
-            } as unknown as DetailPost;
+            } as unknown as DetailPostDto;
         }
     }
 
@@ -184,7 +189,7 @@ export class PostService {
             throw new BadRequestException();
 
         await this.PostModel.findByIdAndUpdate(id, {$addToSet: {likedUserId: userId}},{new: true});
-        await this.verificationModel.findByIdAndUpdate(userId, {$addToSet: {likePostId: id}}, {new:true});
+        await this.UserModel.findByIdAndUpdate(userId, {$addToSet: {likePostId: id}}, {new:true});
         
         await this.notifications.create({
             userId: post.authorId,
@@ -203,7 +208,7 @@ export class PostService {
             throw new BadRequestException();
 
         await this.PostModel.findByIdAndUpdate(id, {$pull: { likedUserId: userId}})
-        await this.verificationModel.findByIdAndUpdate(userId, {$pull: {likePostId: id}})
+        await this.UserModel.findByIdAndUpdate(userId, {$pull: {likePostId: id}})
         return {isLike:false};
     }
 
@@ -258,13 +263,13 @@ export class PostService {
 
         const newPost = await new this.PostModel(postData);
         // User Collection에 wrotePost(작성한 게시글)에 해당 게시글 _id 추가
-        await this.verificationModel.findByIdAndUpdate(userId, {
+        await this.UserModel.findByIdAndUpdate(userId, {
             $addToSet: {wrotePost: newPost._id}
         });
         return newPost.save();
     }
 
-    async updatePost(id: string, updateData: any, userId: string): Promise<DetailPost | null> {
+    async updatePost(id: string, updateData: any, userId: string): Promise<DetailPostDto | null> {
         
         const beforeCurrentPerson = await this.PostModel.findById(id).select('currentPerson');
         if (updateData.currentPerson >= beforeCurrentPerson!)
@@ -285,7 +290,7 @@ export class PostService {
     // 아래 세개 작동안되고 deletePost가 실행됨
     async deletePost(id: string, userId: string) {
         await this.PostModel.findByIdAndDelete(id);
-        await this.verificationModel.findByIdAndUpdate(userId, {$pull: {wrotePost: id}});
+        await this.UserModel.findByIdAndUpdate(userId, {$pull: {wrotePost: id}});
         return {message:"success"};
     }
 
@@ -311,7 +316,7 @@ export class PostService {
     async updateMember(id:string , postId:string, userId:string){
         await this.checkAuthor(id, postId);
 
-        await this.verificationModel.updateOne({_id:userId}, 
+        await this.UserModel.updateOne({_id:userId}, 
             {$addToSet: {joinPostId: postId}}
         );
 
@@ -334,7 +339,7 @@ export class PostService {
 
         this.createNotificationForMember(postId, userId, post.memberId);
 
-        await this.verificationModel.updateOne({_id:userId},
+        await this.UserModel.updateOne({_id:userId},
             {$pull: {likePostId: postId}}
         );
 
@@ -344,7 +349,7 @@ export class PostService {
 
         return await this.PostModel.updateOne({_id:postId},
             {$addToSet: {memberId: userId}},
-            {currentPerson: newCurrentPerson}
+            {$set: {currentPerson: newCurrentPerson}}
         );
 
         
@@ -352,7 +357,7 @@ export class PostService {
 
     async deleteLikePostId(id: string, postId:string, userId:string) {
         await this.checkAuthor(id, postId);
-        await this.verificationModel.updateOne({_id:userId},
+        await this.UserModel.updateOne({_id:userId},
             {$pull: {likePostId: postId}}
         );
 
@@ -372,7 +377,7 @@ export class PostService {
 
     async deleteMember(id: string, postId:string, userId:string){
         await this.checkAuthor(id, postId);
-        await this.verificationModel.updateOne({_id:userId},
+        await this.UserModel.updateOne({_id:userId},
             {$pull: {joinPostId: postId}}
         );
 

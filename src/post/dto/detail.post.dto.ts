@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { HeartType } from "src/constants/user.constants";
-import { Schedule } from "./schedule.model";
+import { ScheduleDto } from "./schedule.dto";
 
-export class DetailPost {
+export class DetailPostDto {
     @ApiProperty({ description: '게시글 ID', type: String })
     _id: string;
 
@@ -28,7 +28,7 @@ export class DetailPost {
     authorId: string;
     memberId:string[];
     description:string;
-    schedule:Schedule[];
+    schedule:ScheduleDto[];
     MaxPerson:number;
     currentPerson:number;
     likedUserId:string[];

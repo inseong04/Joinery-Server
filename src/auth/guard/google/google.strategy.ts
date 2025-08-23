@@ -5,7 +5,7 @@ import { AuthService } from 'src/auth/auth.service';
 import { Profile } from 'src/types/passport';
 import { ConfigService } from '@nestjs/config';
 import { google } from 'googleapis';
-import { UserDataModel } from 'src/auth/model/user-data.model';
+import { UserData } from 'src/auth/interfaces/user-data.interface';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
@@ -37,7 +37,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         personFields: 'genders,birthdays',
       }); 
 
-      const user = await this.authService.findOrCreateUserByGoogle(profile, userData.data as unknown as UserDataModel)
+      const user = await this.authService.findOrCreateUserByGoogle(profile, userData.data as unknown as UserData)
 
       if (!user){
           throw new UnauthorizedException();

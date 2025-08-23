@@ -4,13 +4,13 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { NotificationDto } from './dto/notification.dto';
 import { PostSchema } from 'src/post/schema/post.schema';
-import { Verification } from 'src/auth/schema/verification.schema';
+import { User } from 'src/auth/schema/user.schema';
 
 @Injectable()
 export class NotificationsService {
-    constructor(@InjectModel('Notification') private notificationSchema : Model<Notification>,
+    constructor(@InjectModel('Notification') private notificationModel : Model<Notification>,
     @InjectModel('Post') private postModel: Model<PostSchema>,
-    @InjectModel('User') private userModel: Model<Verification>
+    @InjectModel('User') private userModel: Model<User>
 ){}
 
     private render(tpl:string, params: Record<string, any>) {
@@ -54,7 +54,7 @@ export class NotificationsService {
         type: T,
         meta: NotificationMetaMap[T]
     ): Promise<boolean> {
-        const existingNotification = await this.notificationSchema.findOne({
+        const existingNotification = await this.notificationModel.findOne({
             userId: userId,
             type: type,
             'meta.postId': meta.postId,
@@ -108,19 +108,19 @@ export class NotificationsService {
         createNotification.message = message;
         createNotification.isRead = false;
 
-        const newNotification = new this.notificationSchema(createNotification);
+        const newNotification = new this.notificationModel(createNotification);
         await newNotification.save();
     }
 
     async getAllNotification(userId:string){
-        const notifications = await this.notificationSchema.find({userId});
+        const notifications = await this.notificationModel.find({userId});
         return notifications;
     }
 
     async getNotificationsLastWeek(userId:string){
         const sevenDays = new Date();
         sevenDays.setDate(sevenDays.getDate() - 7);
-        const notifications = await this.notificationSchema.find({
+        const notifications = await this.notificationModel.find({
             userId: userId,
             createdAt: { $gte: sevenDays }
           }).sort({ createdAt: -1 });
@@ -129,13 +129,13 @@ export class NotificationsService {
     }
 
     async isReadCheck(id:string, userId:string){
-        const notification = await this.notificationSchema.findById(id) as NotificationDocument;
+        const notification = await this.notificationModel.findById(id) as NotificationDocument;
         if (!notification)
             throw new NotFoundException();
         if (notification.userId != userId) 
             throw new BadRequestException();
         
-        await this.notificationSchema.findByIdAndUpdate(id,
+        await this.notificationModel.findByIdAndUpdate(id,
             {$set:{ isRead:true } }
         );
     }
