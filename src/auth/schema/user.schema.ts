@@ -4,7 +4,7 @@ import { Gender } from "src/constants/user.constants";
 import { Region } from "src/constants/region-list.constant";
 
 @Schema({timestamps: true})
-export class Verification {
+export class User {
 
         @ApiProperty({description:'공급처 구분. local / google'})
         @Prop({ required:true, enum: ['local', 'google'], default: 'local'})
@@ -67,4 +67,4 @@ export class Verification {
         bookmarkPostId:string[];
         
 }
-export const VerificationSchema = SchemaFactory.createForClass(Verification);
+export const UserSchema = SchemaFactory.createForClass(User);

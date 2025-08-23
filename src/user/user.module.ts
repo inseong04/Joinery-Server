@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { VerificationSchema } from 'src/auth/schema/verification.schema';
+import { UserSchema } from 'src/auth/schema/user.schema';
 import { PostSchema } from 'src/post/schema/post.schema';
 import { UploadModule } from 'src/upload/upload.module';
 import { MulterModule } from '@nestjs/platform-express';
@@ -15,7 +15,7 @@ import { NotificationsModule } from 'src/notifications/notifications.module';
   imports:[
     AuthModule,
     NotificationsModule,
-    MongooseModule.forFeature([{name: 'User', schema:VerificationSchema}, {name:'Post', schema:PostSchema}]),
+    MongooseModule.forFeature([{name: 'User', schema:UserSchema}, {name:'Post', schema:PostSchema}]),
     UploadModule,
     MulterModule.registerAsync({
       imports: [ConfigModule],

@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { ApiProperty } from "@nestjs/swagger";
-import { Schedule } from "../model/schedule.model";
+import { ScheduleDto } from "../dto/schedule.dto";
 
 @Schema({timestamps:true})
 export class PostSchema {
@@ -25,8 +25,8 @@ export class PostSchema {
     description:string;
 
     @ApiProperty({description:'스케줄 list'})
-    @Prop({type:[Schedule]})
-    schedule:Schedule[];
+    @Prop({type:[ScheduleDto]})
+    schedule:ScheduleDto[];
 
     @ApiProperty({description: '시작하는 스케줄 날짜. 2025-01-21 와 같이 format'})
     @Prop()

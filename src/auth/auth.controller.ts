@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Res, UseGuards, BadRequestException, ConflictException, Req, Delete, Patch } from '@nestjs/common';
 import { SignUpDto } from './dto/signup.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { Verification, VerificationSchema } from './schema/verification.schema';
+import { User, UserSchema } from './schema/user.schema';
 import { AuthService } from './auth.service';
 import { ApiBearerAuth, ApiBody, ApiCreatedResponse, ApiHideProperty, ApiOkResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SignInDto } from './dto/signin.dto';
@@ -82,7 +82,7 @@ export class AuthController {
         schema: SignUpConflictResponse
     })
     @Post('/sign-up')
-    async create(@Body() signUpDto:SignUpDto) : Promise<Verification> {
+    async create(@Body() signUpDto:SignUpDto) : Promise<User> {
         try {
             return await this.authService.create(signUpDto);
         } catch (error) {
