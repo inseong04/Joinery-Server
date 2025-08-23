@@ -334,6 +334,14 @@ export class PostService {
 
         this.createNotificationForMember(postId, userId, post.memberId);
 
+        await this.verificationModel.updateOne({_id:userId},
+            {$pull: {likePostId: postId}}
+        );
+
+        await this.PostModel.updateOne({_id: postId},
+            {$pull: {likedUserId: userId}},
+        );
+
         return await this.PostModel.updateOne({_id:postId},
             {$addToSet: {memberId: userId}},
             {currentPerson: newCurrentPerson}
