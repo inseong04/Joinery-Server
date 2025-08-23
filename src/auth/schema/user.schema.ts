@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { ApiProperty } from "@nestjs/swagger";
 import { Gender } from "src/constants/user.constants";
 import { Region } from "src/constants/region-list.constant";
+import { Matches } from "class-validator";
 
 @Schema({timestamps: true})
 export class User {
@@ -15,6 +16,9 @@ export class User {
         username:string;
         
         @ApiProperty({description:'비밀번호'})
+        @Matches(
+                /^(?:(?=.*[a-z])(?=.*[A-Z])|(?=.*[a-z])(?=.*\d)|(?=.*[a-z])(?=.*[^a-zA-Z0-9])|(?=.*[A-Z])(?=.*\d)|(?=.*[A-Z])(?=.*[^a-zA-Z0-9])|(?=.*\d)(?=.*[^a-zA-Z0-9])).{8,}$/,{
+                  message: '비밀번호는 8자 이상이며, 대문자/소문자/숫자/특수문자 중 최소 2개 이상을 포함해야 합니다.',},)
         @Prop({select: false})
         password:string;
 

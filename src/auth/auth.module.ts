@@ -22,12 +22,12 @@ import { mailVerificationSchema } from './schema/mail-verification.schema';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
-        const secret = configService.get<string>('SECRET') || 'helloworld';
+        const secret = configService.get<string>('SECRET');
         
         return {
           secret: secret,
           signOptions: { 
-            expiresIn: configService.get<string>('JWT_EXPIRES_IN') || '365d'
+            expiresIn: configService.get<string>('JWT_EXPIRES_IN')
           },
         };
       },
