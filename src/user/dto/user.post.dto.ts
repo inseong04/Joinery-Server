@@ -1,4 +1,4 @@
-export class UserPostModel{
+export class UserPostDto{
     _id:string|null;
     region_id:number|null;
     username:string|null;

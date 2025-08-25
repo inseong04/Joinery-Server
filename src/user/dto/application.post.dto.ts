@@ -1,6 +1,6 @@
 import { Region } from "src/constants/region-list.constant";
 
-export class ApplicationPostModel {
+export class ApplicationPostDto {
     _id: string;
     region_id: Region;
     authorId: string[];

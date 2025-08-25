@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsArray, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
-import { Schedule } from "../model/schedule.model";
+import { ScheduleDto } from "./schedule.dto";
 import { Transform, Type } from "class-transformer";
 
 export class PostCreateDto{
@@ -18,8 +18,8 @@ export class PostCreateDto{
     
         @ApiProperty({description:'스케줄 list'})
         @ValidateNested({each: true})
-        @Type(()=> Schedule)
-        schedule:Schedule[];
+        @Type(()=> ScheduleDto)
+        schedule:ScheduleDto[];
     
         @ApiProperty({description: '시작하는 스케줄 날짜. 2025-01-21 와 같이 format'})
         @IsString()

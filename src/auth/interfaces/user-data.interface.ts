@@ -1,4 +1,4 @@
-export interface UserDataModel {
+export interface UserData {
     birthdays:Birthdays;
     genders:Genders;
     email:string;
