@@ -347,9 +347,9 @@ export class PostService {
             {$pull: {likedUserId: userId}},
         );
 
-        return await this.PostModel.updateOne({_id:postId},
-            {$addToSet: {memberId: userId}},
-            {$set: {currentPerson: newCurrentPerson}}
+        await this.PostModel.updateOne({_id:postId},
+            {$addToSet: {memberId: userId},
+            $set: {currentPerson: newCurrentPerson}}
         );
 
         
@@ -388,8 +388,8 @@ export class PostService {
         const newCurrentPerson = post.currentPerson - 1;
 
         return await this.PostModel.updateOne({_id:postId},
-            {$pull: {memberId: userId}},
-            {currentPerson: newCurrentPerson}
+            {$pull: {memberId: userId},
+            currentPerson: newCurrentPerson}
         );
     }
 }
