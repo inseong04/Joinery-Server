@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
-import { NotificationsController } from './notifications.controller';
-import { NotificationsService } from './notifications.service';
+import { NotificationsController } from './presentation/notifications.controller';
+import { NotificationsService } from './application/notifications.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UserSchema } from 'src/auth/schema/user.schema';
-import { mailVerificationSchema } from 'src/auth/schema/mail-verification.schema';
-import { NotificationSchema } from './schema/notification.schema';
-import { PostSchema } from 'src/post/schema/post.schema';
+import { UserSchema } from 'src/auth/infrastructure/schema/user.schema';
+import { mailVerificationSchema } from 'src/auth/infrastructure/schema/mail-verification.schema';
+import { NotificationSchema } from './infrastructure/schema/notification.schema';
+import { PostSchema } from 'src/post/infrastructure/schema/post.schema';
+import { MongoNotificationRepository } from './infrastructure/notification-repository';
 
 @Module({
   imports:[
@@ -17,7 +18,11 @@ import { PostSchema } from 'src/post/schema/post.schema';
         ]),
   ],
   controllers: [NotificationsController],
-  providers: [NotificationsService],
+  providers: [NotificationsService,   {
+    provide:'NotificationRepository',
+    useClass: MongoNotificationRepository
+  }],
+
   exports: [NotificationsService]
 })
 export class NotificationsModule {}

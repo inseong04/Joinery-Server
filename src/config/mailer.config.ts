@@ -16,7 +16,7 @@ export class mailerConfig implements MailerAsyncOptions {
             from: '"Joinery" <joinery0815@gmail.com>',
         },
         template: {
-            dir: path.join(process.cwd(), "src/auth/templates"),
+            dir: path.join(process.cwd(), "src/notifications/templates"),
             adapter: new EjsAdapter(),
             options: {
                 strict: false,

@@ -1,15 +1,16 @@
 import { Module } from '@nestjs/common';
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
+import { AuthController } from './presentation/auth.controller';
+import { AuthService } from './application/auth.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UserSchema } from './schema/user.schema';
+import { UserSchema } from './infrastructure/schema/user.schema';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy } from './guard/jwt.strategy';
-import { GoogleStrategy } from './guard/google/google.strategy';
+import { JwtStrategy } from './presentation/guard/jwt.strategy';
+import { GoogleStrategy } from './presentation/guard/google/google.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { mailerConfig } from 'src/config/mailer.config';
-import { mailVerificationSchema } from './schema/mail-verification.schema';
+import { mailVerificationSchema } from './infrastructure/schema/mail-verification.schema';
+import { MongoUserRepository } from './infrastructure/user-repository';
 
 @Module({
   imports: [
@@ -22,12 +23,12 @@ import { mailVerificationSchema } from './schema/mail-verification.schema';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
-        const secret = configService.get<string>('SECRET') || 'helloworld';
+        const secret = configService.get<string>('SECRET');
         
         return {
           secret: secret,
           signOptions: { 
-            expiresIn: configService.get<string>('JWT_EXPIRES_IN') || '365d'
+            expiresIn: configService.get<string>('JWT_EXPIRES_IN')
           },
         };
       },
@@ -35,7 +36,12 @@ import { mailVerificationSchema } from './schema/mail-verification.schema';
     })
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, GoogleStrategy],
+  providers: [AuthService, JwtStrategy, GoogleStrategy,
+    {
+      provide: 'UserRepository',
+      useClass: MongoUserRepository,
+    },
+  ],
   exports: [JwtModule] // JWT 모듈을 export
 })
 export class AuthModule {}

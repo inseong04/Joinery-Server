@@ -1,15 +1,16 @@
 import { Module } from '@nestjs/common';
-import { UserController } from './user.controller';
-import { UserService } from './user.service';
+import { UserController } from './presentation/user.controller';
+import { UserService } from './application/user.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UserSchema } from 'src/auth/schema/user.schema';
-import { PostSchema } from 'src/post/schema/post.schema';
+import { UserSchema } from 'src/auth/infrastructure/schema/user.schema';
+import { PostSchema } from 'src/post/infrastructure/schema/post.schema';
 import { UploadModule } from 'src/upload/upload.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { multerOptionsFactory } from 'src/config/multer.config';
 import { AuthModule } from 'src/auth/auth.module';
 import { NotificationsModule } from 'src/notifications/notifications.module';
+import { MongoUserRepository } from 'src/auth/infrastructure/user-repository';
 
 @Module({
   imports:[
@@ -24,6 +25,11 @@ import { NotificationsModule } from 'src/notifications/notifications.module';
     }),
   ],
   controllers: [UserController],
-  providers: [UserService]
+  providers: [UserService,
+    {
+      provide:'UserRepository',
+      useClass:MongoUserRepository
+    }
+  ]
 })
 export class UserModule {}
