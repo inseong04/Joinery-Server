@@ -257,15 +257,18 @@ export class PostService {
     async updatePost(id: string, updateData: any, userId: string): Promise<DetailPostDto | null> {
         
         const beforeCurrentPerson = await this.postRepository.findById(id);
-        if (updateData.currentPerson >= beforeCurrentPerson!)
-            throw new BadRequestException();
         
-        const now = new Date();
-        if (DateUtils.stringToDate(updateData.startDate) < now || DateUtils.stringToDate(updateData.endDate) < now)
-            throw new BadRequestException();
-
+        if (updateData.currentPerson){
+            if (updateData.currentPerson >= beforeCurrentPerson!)
+                throw new BadRequestException();
+        }
+        if (updateData.startDate) {
+            const now = new Date();
+            if (DateUtils.stringToDate(updateData.startDate) < now || DateUtils.stringToDate(updateData.endDate) < now)
+                throw new BadRequestException();
+        }
         await this.postRepository.update(id, updateData);
-        return this.getPost(id, userId);
+        return await this.getPost(id, userId);
     } // 테스트 요망
 
     async deletePost(id: string, userId: string) {
