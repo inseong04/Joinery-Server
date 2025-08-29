@@ -70,7 +70,7 @@ export class AuthService {
         // const userResponse = savedUser.toObject();
         // if (userResponse.birthDate) {
         //     userResponse.birthDate = DateUtils.formatDate(userResponse.birthDate) as any;
-        // }        
+        // }
     }
 
     async sendMail(email: string): Promise<void> {

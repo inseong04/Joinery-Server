@@ -22,11 +22,11 @@ export class MongoUserRepository implements UserRepository {
     }
 
     async findById(id: string): Promise<User | null> {
-        return await this.userModel.findById(id);
+        return await this.userModel.findById(id).lean();
     }
 
     async findByUsername(username:string): Promise<User | null>{
-        return await this.userModel.findOne({ username: username });
+        return await this.userModel.findOne({ username: username }).lean();
     }
 
     async findByUsernameWithPassword(username:string): Promise<User | null>{
@@ -35,13 +35,13 @@ export class MongoUserRepository implements UserRepository {
 
 
     async findByEmail(email:string): Promise<User | null>{
-        return await this.userModel.findOne({ email:email });
+        return await this.userModel.findOne({ email:email }).lean();
     }
 
     async updateById(id:string, updateData:Partial<User>): Promise<User | null>{
         return await this.userModel.findByIdAndUpdate(id, updateData,
             { new: true, runValidators: true }
-        );
+        ).lean();
     }
 
     async updatePassword(id: string, password)  {

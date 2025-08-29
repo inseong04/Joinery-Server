@@ -28,10 +28,10 @@ export class MongoPostRepository implements PostRepository {
     }
 
     async findById(id: string): Promise<PostSchema | null> {
-        return await this.postModel.findById(id);
+        return await this.postModel.findById(id).lean();
     }
     async findByRegionId(regionId: number): Promise<PostInformation[] | null> {
-        return await this.postModel.find({region_id: regionId});
+        return await this.postModel.find({region_id: regionId}).lean();
     }
     findByField(postData: Partial<PostGetDto>): Promise<PostSchema> {
         throw new Error("Method not implemented.");
@@ -60,7 +60,7 @@ export class MongoPostRepository implements PostRepository {
                     _id: 0
                 }
             }
-        ])
+        ]);
     }
     async create(postData: PostCreateDto): Promise<PostSchema> {
         const newPost = await new this.postModel(postData);
@@ -71,24 +71,24 @@ export class MongoPostRepository implements PostRepository {
             id,
             postUpdateData,
             { new: true }
-        );
+        ).lean();
     }
 
     async updateToPullFromArray(_id: string, pullData: MongoPullOperation<PostArrayFields>): Promise<PostSchema | null> {
-        return await this.postModel.findByIdAndUpdate(_id, pullData, {new:true});
+        return await this.postModel.findByIdAndUpdate(_id, pullData, {new:true}).lean();
     }
 
     async updateToAddToArray(_id: string, addData: MongoAddToSetOperation<PostArrayFields>): Promise<PostSchema | null> {
-        return await this.postModel.findByIdAndUpdate(_id, addData, {new:true});
+        return await this.postModel.findByIdAndUpdate(_id, addData, {new:true}).lean();
     }
     
     async updateToPushToArray(_id: string, pushData: MongoPushOperation<PostArrayFields>): Promise<PostSchema | null> {
-        return await this.postModel.findByIdAndUpdate(_id, pushData, {new:true});
+        return await this.postModel.findByIdAndUpdate(_id, pushData, {new:true}).lean();
     }
 
     async updateToAddToArrayAndSet(_id: string, addData: any) {
-            return await this.postModel.findByIdAndUpdate(_id, addData);
-        }
+        return await this.postModel.findByIdAndUpdate(_id, addData).lean();
+    }
 
 
     async delete(id: string) {
