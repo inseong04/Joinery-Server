@@ -15,6 +15,18 @@ Server that supports REST API for the **Joinery** Service.
 
 <br/>
 
+## Stack
+
+* Nest.js
+* Mongo DB
+* JWT
+* Google Oauth
+* AWS S3
+* Multer
+* Clean Architecture
+
+<br/>
+
 ## Installation
 
 ```bash
