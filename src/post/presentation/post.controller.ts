@@ -452,6 +452,18 @@ export class PostController {
         description: '멤버를 추가할 게시글의 ID',
         example: '507f1f77bcf86cd799439011'
     })
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                userId: { 
+                    type: 'string', 
+                    example: 14, 
+                    description: '동행 신청 유저의 _id'
+                }
+            }
+        }
+    })
     @ApiBearerAuth('access-token')
     @ApiOkResponse({
         description: '멤버 추가 성공',
@@ -487,6 +499,18 @@ export class PostController {
         type: 'string',
         description: '신청을 거절할 게시글의 ID',
         example: '507f1f77bcf86cd799439011'
+    })
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                userId: { 
+                    type: 'string', 
+                    example: 14, 
+                    description: '동행 신청 유저의 _id'
+                }
+            }
+        }
     })
     @ApiBearerAuth('access-token')
     @ApiOkResponse({
