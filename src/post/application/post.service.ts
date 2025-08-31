@@ -277,11 +277,12 @@ export class PostService {
     }
 
     async checkAuthor(id: string, postId:string) {
-        const post = await this.postRepository.findById(id);
+        const post = await this.postRepository.findById(postId);
         if (!post)
             throw new NotFoundException();
         if (id != post.authorId)
             throw new BadRequestException();   
+        
     }
 
     private async createNotificationForMember(postId:string, userId:string, memberId:string[]){
@@ -309,8 +310,9 @@ export class PostService {
             throw new NotFoundException();
         
         const newCurrentPerson = post.currentPerson + 1;
-        if  (newCurrentPerson > post.maxPerson)
+        if  (newCurrentPerson > post.maxPerson){
             throw new BadRequestException();
+        }
 
         await this.notifications.create({
             userId: userId,
@@ -331,7 +333,7 @@ export class PostService {
         await this.postRepository.updateToAddToArrayAndSet(id, {$addToSet: {memberId: userId},
             $set: {currentPerson: newCurrentPerson}});
 
-
+            
         
     }
 
