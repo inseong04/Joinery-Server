@@ -13,6 +13,7 @@ export class MongoNotificationRepository implements NotificationRepository{
 
 
     async create(notificationData: NotificationDto) {
+        console.log("CCCCC");
         const newNotification = new this.notificationModel(notificationData);
         await newNotification.save();
     }

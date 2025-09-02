@@ -17,7 +17,7 @@ export class MongoUserRepository implements UserRepository {
     async updateToAddToArray(id: string, addData: MongoAddToSetOperation<UserArrayFields>): Promise<User | null> {
         return await this.userModel.findByIdAndUpdate(id, addData);
     }
-    updateToPushToArray(id: string, pushData: MongoPushOperation<UserArrayFields>): Promise<User | null> {
+    async updateToPushToArray(id: string, pushData: MongoPushOperation<UserArrayFields>): Promise<User | null> {
         throw new Error("Method not implemented.");
     }
 

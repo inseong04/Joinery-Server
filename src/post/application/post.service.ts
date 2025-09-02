@@ -298,43 +298,64 @@ export class PostService {
         });
     }
 
-    async updateMember(id:string , postId:string, userId:string){
-        await this.checkAuthor(id, postId);
-
-        await this.userRepository.updateToAddToArray(userId,
-            {$addToSet: {joinPostId: postId}}
-        );
-
-        const post = await this.postRepository.findById(postId);
-        if (post == undefined)
-            throw new NotFoundException();
-        
-        const newCurrentPerson = post.currentPerson + 1;
-        if  (newCurrentPerson > post.maxPerson){
-            throw new BadRequestException();
-        }
-
-        await this.notifications.create({
-            userId: userId,
-            type: NotificationType.LIKE_ACCEPTED,
-            meta: {
-                postId:postId,
-                actorId: id
-            }
-        });
-
-        this.createNotificationForMember(postId, userId, post.memberId);
-
-        await this.userRepository.updateToPullFromArray(userId,
-            {$pull: {likePostId: postId}}
-        );
-
-        await this.postRepository.updateToPullFromArray(id, {$pull: {likedUserId: userId}})
-        await this.postRepository.updateToAddToArrayAndSet(id, {$addToSet: {memberId: userId},
-            $set: {currentPerson: newCurrentPerson}});
-
+    async updateMember(id: string, postId: string, userId: string) {
+        try {
+            await this.checkAuthor(id, postId);
             
-        
+            const post = await this.postRepository.findById(postId);
+            if (!post) {
+                throw new NotFoundException('Post not found');
+            }
+            
+            if (post.currentPerson >= post.maxPerson) {
+                throw new BadRequestException('Maximum person limit reached');
+            }
+            
+            if (post.memberId.includes(userId)) {
+                throw new BadRequestException('User is already a member');
+            }
+            
+            await this.userRepository.updateToAddToArray(userId, {
+                $addToSet: { joinPostId: postId }
+            });
+            
+            await this.postRepository.updateToAddToArrayAndSet(postId, {
+                $addToSet: { memberId: userId },
+                $set: { currentPerson: post.currentPerson + 1 }
+            });
+            
+            await this.userRepository.updateToPullFromArray(userId, {
+                $pull: { likePostId: postId }
+            });
+            
+            await this.postRepository.updateToPullFromArray(postId, {
+                $pull: { likedUserId: userId }
+            });
+            
+            await this.notifications.create({
+                userId: userId,
+                type: NotificationType.LIKE_ACCEPTED,
+                meta: {
+                    postId: postId,
+                    actorId: id
+                }
+            });
+            
+            for (const memberId of post.memberId) {
+                await this.notifications.create({
+                    userId: memberId,
+                    type: NotificationType.MEMBER_JOINED,
+                    meta: {
+                        postId: postId,
+                        actorId: userId
+                    }
+                });
+            }
+                        
+        } catch (error) {
+            console.error('Error in updateMember:', error);
+            throw error;
+        }
     }
 
     async deleteLikePostId(id: string, postId:string, userId:string) {

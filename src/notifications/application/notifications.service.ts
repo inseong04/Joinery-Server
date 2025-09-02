@@ -64,7 +64,7 @@ export class NotificationsService {
             isRead: false
         });
 
-        return !!existingNotification;
+        return !existingNotification;
     }
 
     /*
@@ -95,7 +95,7 @@ export class NotificationsService {
         type:T;
         meta: NotificationMetaMap[T];
     }) {
-
+        console.log(args.userId, args.type, args.meta);
         const isDuplicate = await this.checkDuplicate(args.userId, args.type, args.meta);
         if (isDuplicate) {
             return; // 중복이면 알림 생성하지 않음

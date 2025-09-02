@@ -452,7 +452,7 @@ export class PostController {
         description: '멤버를 추가할 게시글의 ID',
         example: '507f1f77bcf86cd799439011'
     })
-    @ApiBody({
+        @ApiBody({
         schema: {
             type: 'object',
             properties: {
