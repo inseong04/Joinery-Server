@@ -13,13 +13,12 @@ export class MongoNotificationRepository implements NotificationRepository{
 
 
     async create(notificationData: NotificationDto) {
-        console.log("CCCCC");
         const newNotification = new this.notificationModel(notificationData);
         await newNotification.save();
     }
 
     async findById(id: string): Promise<Notification | null> {
-        return await this.notificationModel.findOne({id});
+        return await this.notificationModel.findOne({id}).lean();
     }
 
     async findByIdWithLastWeek(id: string): Promise<Notification | null> {
@@ -28,18 +27,18 @@ export class MongoNotificationRepository implements NotificationRepository{
         const notifications = await this.notificationModel.findOne({
             userId: id,
             createdAt: { $gte: sevenDays }
-        }).sort({ createdAt: -1 });
+        }).sort({ createdAt: -1 }).lean();
         return notifications as Notification | null;
     }
 
     async findByField(notificationData: Partial<NotificationDto>): Promise<Notification | null> {
-        return await this.notificationModel.findOne(notificationData);
+        return await this.notificationModel.findOne(notificationData).lean();
     }
 
     async isReadCheck(id: string): Promise<Notification | null>{
         return await this.notificationModel.findByIdAndUpdate(id,
             {$set:{ isRead:true } }
-        );    
+        ).lean();    
     }
     
 }

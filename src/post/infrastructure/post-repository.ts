@@ -31,7 +31,9 @@ export class MongoPostRepository implements PostRepository {
         return await this.postModel.findById(id).lean();
     }
     async findByRegionId(regionId: number): Promise<PostInformation[] | null> {
-        return await this.postModel.find({region_id: regionId}).lean();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return await this.postModel.find({region_id: regionId, startDate: { $gte: today }}).lean();
     }
     findByField(postData: Partial<PostGetDto>): Promise<PostSchema> {
         throw new Error("Method not implemented.");
