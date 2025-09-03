@@ -24,6 +24,9 @@ export class DetailPostDto {
     @ApiProperty({ description: '하트 타입', enum: ['NoOne', 'UserOnly', 'Both'] })
     heartType: string;
 
+    @ApiProperty({ description: 'bookmark 여부. 0은 북마크X 1은 북마크O'})
+    isBookmark: boolean;
+
     region_id:number;
     authorId: string;
     memberId:string[];

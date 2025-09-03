@@ -55,8 +55,6 @@ export class PostService {
             result = postList;
     }
     else {
-        const filterStartDate = new Date(findRegionDto.startDate);
-        const filterEndDate = new Date(findRegionDto.endDate);
         const posts = await this.postRepository.findByRegionIdAndFilterDate(regionId, findRegionDto.startDate, findRegionDto.endDate);
         const postList: PreviewPostDto[] = await Promise.all(posts.map(async item => {
                 const user = await this.userRepository.findById(item.authorId);
@@ -141,12 +139,13 @@ export class PostService {
                         return someUser;
                     })
                 );
-
+            
                 return {
                     ...rest,
                     startDate: DateUtils.formatDate(post.startDate),
                     endDate: DateUtils.formatDate(post.endDate),
                     heartType: heartType,
+                    isBookmark: false,
                     author: author,
                     members: members,
                     schedule: schedules,
@@ -156,11 +155,14 @@ export class PostService {
 
             else {
                 // 게시글 작성자 아닐시
+                
+                const isBookmark = user.bookmarkPostId.includes(post._id.toString()) ? true : false;
                 return {
                     ...rest,
                     startDate: DateUtils.formatDate(post.startDate),
                     endDate: DateUtils.formatDate(post.endDate),
                     heartType: heartType,
+                    isBookmark: isBookmark,
                     author: author,
                     members: members,
                     schedule: schedules,  
@@ -168,7 +170,6 @@ export class PostService {
             }
             
         } else { // 토큰 없을시
-            console.log("토큰X")
             const {authorId, memberId, likedUserId, schedule, ...rest} = post;
 
             // startDate, endDate를 'YYYY-MM-DD HH' string로 변환
@@ -177,6 +178,7 @@ export class PostService {
                 startDate: DateUtils.formatDate(post.startDate),
                 endDate: DateUtils.formatDate(post.endDate),
                 heartType: HeartType.NoOne, // 토큰이 없을 때는 NoOne으로 설정
+                isBookmark: false,
                 author: author,
                 members: members,
                 schedule: schedules,
