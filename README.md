@@ -6,23 +6,45 @@ Server that supports REST API for the **Joinery** Service.
 
 <br/>
 
-## Service
+## Structure
 
-* Auth
-* User
-* Post
-* Notification
+```
+src/
+├── auth/           # Auth Module (JWT, Google OAuth, Mailer)
+├── post/           # Post Management Module
+├── user/           # User Management Module
+├── notifications/  # Notification Module
+├── upload/         # File Upload Module (AWS S3)
+└── utils/          # Utill Funtions
+```
 
 <br/>
 
-## Stack
+## Features
 
-* Nest.js
-* Mongo DB
-* JWT
-* Google Oauth
-* AWS S3
-* Multer
+### Auth Module
+* JWT Authentication
+* Google OAuth 2.0 Integration
+* User Registration & Account Management
+* Email Verification
+* Password Management
+
+### Post Module
+* Post CRUD
+* Regional Post Classification
+* Like System
+
+### User Module
+* Profile Management
+* Bookmark System
+
+### Notification Module
+* Notification CRUD
+
+### Upload Module
+* File CRUD
+
+### Technical Features
 * Clean Architecture
 
 <br/>
