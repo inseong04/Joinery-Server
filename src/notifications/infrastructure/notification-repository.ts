@@ -18,7 +18,11 @@ export class MongoNotificationRepository implements NotificationRepository{
     }
 
     async findById(id: string): Promise<Notification | null> {
-        return await this.notificationModel.findOne({id}).lean();
+        return await this.notificationModel.findOne({_id: id}).lean();
+    }
+
+    async findAllById(id: string): Promise<Notification[] | null> {
+        return await this.notificationModel.find({userId: id}).lean();
     }
 
     async findByIdWithLastWeek(id: string): Promise<Notification | null> {

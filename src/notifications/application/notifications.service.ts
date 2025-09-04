@@ -114,7 +114,7 @@ export class NotificationsService {
     }
 
     async getAllNotification(userId:string){
-        return await this.notificationRepository.findById(userId);
+        return await this.notificationRepository.findAllById(userId);
     }
 
     async getNotificationsLastWeek(userId:string){
