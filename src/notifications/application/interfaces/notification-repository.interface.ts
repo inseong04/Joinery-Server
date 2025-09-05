@@ -5,7 +5,7 @@ export interface NotificationRepository {
     create(notificationData: NotificationDto);
     findById(id: string): Promise<Notification | null>;
     findAllById(id: string): Promise<Notification[] | null>;
-    findByIdWithLastWeek(id: string): Promise<Notification | null>;
+    findByIdWithLastWeek(id: string): Promise<Notification[] | null>;
     findByField(notificationData: Partial<NotificationDto> & { 'meta.postId'?: string }): Promise<Notification | null>;
     isReadCheck(id: string);
 }
