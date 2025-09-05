@@ -25,14 +25,14 @@ export class MongoNotificationRepository implements NotificationRepository{
         return await this.notificationModel.find({userId: id}).lean();
     }
 
-    async findByIdWithLastWeek(id: string): Promise<Notification | null> {
+    async findByIdWithLastWeek(id: string): Promise<Notification[] | null> {
         const sevenDays = new Date();
         sevenDays.setDate(sevenDays.getDate() - 7);
-        const notifications = await this.notificationModel.findOne({
+        const notifications = await this.notificationModel.find({
             userId: id,
             createdAt: { $gte: sevenDays }
         }).sort({ createdAt: -1 }).lean();
-        return notifications as Notification | null;
+        return notifications as Notification[] | null;
     }
 
     async findByField(notificationData: Partial<NotificationDto>): Promise<Notification | null> {
