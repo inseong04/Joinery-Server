@@ -57,3 +57,5 @@ export class PostSchema {
 }
 
 export const newPostSchema = SchemaFactory.createForClass(PostSchema);
+
+newPostSchema.index({ title: 'text', description: 'text'});

@@ -17,5 +17,6 @@ export interface PostRepository {
     updateToPushToArray(id: string, pushData : MongoPushOperation<PostArrayFields>): Promise<PostSchema | null>;
     updateToAddToArrayAndSet(_id: string, addData: any);
     delete(id: string);
+    search(keyword: string);
     
 }
