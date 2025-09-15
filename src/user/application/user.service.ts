@@ -13,34 +13,38 @@ import { NotificationType, TEMPLATES } from '../../notifications/types/notificat
 
 @Injectable()
 export class UserService {
-    constructor(
-        @InjectModel('Post') private postModel:Model<PostSchema>,
-        @InjectModel('User') private verificationModel: Model<User & Document>,
-        private uploadService: UploadService,
-        private readonly notificationsService: NotificationsService,
-    ){}
+  constructor(
+    @InjectModel('Post') private postModel: Model<PostSchema>,
+    @InjectModel('User') private verificationModel: Model<User & Document>,
+    private uploadService: UploadService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
-    async getUser(username:string){
-        const user = await this.verificationModel.findOne({username: username})
-        if (!user) throw new NotFoundException();
+  async getUser(username: string) {
+    const user = await this.verificationModel.findOne({ username: username });
+    if (!user) throw new NotFoundException();
 
-        // birthDate를 string으로 변환
-        const userResponse = user.toObject();
-        if (userResponse.birthDate) {
-            userResponse.birthDate = DateUtils.formatDate(userResponse.birthDate) as any;
-        }
-        
-        return userResponse;
+    // birthDate를 string으로 변환
+    const userResponse = user.toObject();
+    if (userResponse.birthDate) {
+      userResponse.birthDate = DateUtils.formatDate(
+        userResponse.birthDate,
+      ) as any;
     }
 
-    async getUserById(id:string) {
-        const user = await this.verificationModel.findById(id);
-        if (!user) throw new NotFoundException();
+    return userResponse;
+  }
 
-        // birthDate를 string으로 변환
-        const userResponse = user.toObject();
-        if (userResponse.birthDate) {
-            userResponse.birthDate = DateUtils.formatDate(userResponse.birthDate) as any;
+  async getUserById(id: string) {
+    const user = await this.verificationModel.findById(id);
+    if (!user) throw new NotFoundException();
+
+    // birthDate를 string으로 변환
+    const userResponse = user.toObject();
+    if (userResponse.birthDate) {
+      userResponse.birthDate = DateUtils.formatDate(
+        userResponse.birthDate,
+      ) as any;
         }
         
         return userResponse;
@@ -249,22 +253,21 @@ export class UserService {
 
      async createNotification(type:NotificationType, userId: string, postId:string){
         let meta;
-        if (type=NotificationType.LIKE){
-            meta = {postId, actorId:userId};
-        } else if (NotificationType.LIKE_ACCEPTED){
-            meta = {postId};
-        } else if (NotificationType.LIKE_REJECTED){
-            meta = {postId};
-        } else if (NotificationType.MEMBER_JOINED){
-            meta = {postId, actorId:userId};
-        } else {
-            throw new BadRequestException();
-        }
-         await this.notificationsService.create({
-            type:type,
-            userId:userId,
-            meta: meta
-         });
-     }
-
+    if ((type = NotificationType.LIKE)) {
+      meta = { postId, actorId: userId };
+    } else if (NotificationType.LIKE_ACCEPTED) {
+      meta = { postId };
+    } else if (NotificationType.LIKE_REJECTED) {
+      meta = { postId };
+    } else if (NotificationType.MEMBER_JOINED) {
+      meta = { postId, actorId: userId };
+    } else {
+      throw new BadRequestException();
+    }
+    await this.notificationsService.create({
+      type: type,
+      userId: userId,
+      meta: meta,
+    });
+  }
 }

@@ -18,6 +18,8 @@ import { NotificationType } from 'src/notifications/types/notifications.types';
 import { PostRepository } from './interfaces/post-repository.interface';
 import { PostInformation } from './interfaces/post-information.interface';
 import { UserRepository } from 'src/auth/application/interfaces/user-repository.interface';
+import { SearchPostDto } from '../presentation/dto/search.post.dto';
+import { SearchAuthor } from './interfaces/author-search.model';
 
 @Injectable()
 export class PostService {
@@ -394,5 +396,31 @@ export class PostService {
 
         return await this.postRepository.updateToAddToArrayAndSet(postId, {$pull: {memberId: userId},
             currentPerson: newCurrentPerson});
+    }
+
+    async search(keyword: string){
+        if (!keyword)
+            throw new BadRequestException();
+
+        const posts = await this.postRepository.search(keyword);
+        
+        const postList: SearchPostDto[] = await Promise.all(posts.map(async item => {
+            const authorUser = await this.userRepository.findById(item.authorId);
+            const author : SearchAuthor = {
+                nickname: authorUser?.nickname ?? 'Unknown',
+                profileImageUrl: authorUser?.profileImageUrl ?? process.env.DEFAULT_PROFILE_IMAGE_URL!
+            };
+            
+            return {
+                _id: item._id.toString(),
+                title: item.title,
+                startDate: DateUtils.formatDate(item.startDate),
+                maxPerson: item.maxPerson,
+                currentPerson: item.currentPerson,
+                author: author,
+            }
+        }));
+
+        return postList;
     }
 }

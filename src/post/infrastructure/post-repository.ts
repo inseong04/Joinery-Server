@@ -15,6 +15,26 @@ export class MongoPostRepository implements PostRepository {
         @InjectModel('Post') private postModel:Model<PostSchema>, 
     ){
     }
+    async search(keyword: string) {
+        const today = new Date();
+        
+        return this.postModel.find(
+        {
+            $text: {
+                $search: keyword
+            },
+            startDate: {$gte: today}
+        },
+        { 
+            score: {$meta: 'textScore'},
+            _id:1,
+            startDate: 1,
+            title: 1,
+            maxPerson: 1,
+            currentPerson: 1,
+            authorId: 1,
+        });
+    }
 
     async findByRegionIdAndFilterDate(regionId: number, startDate:string, endDate:string): Promise<PostInformation[]> {
         const filterStartDate = new Date(startDate);

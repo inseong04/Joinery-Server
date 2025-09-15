@@ -387,7 +387,7 @@ export class PostController {
         description: '기존 게시글을 삭제합니다. 작성자만 삭제할 수 있습니다.'
     })
     @ApiParam({
-        name:'id', 
+        name:'id',   
         type:'string',
         description: '삭제할 게시글의 ID',
         example: '507f1f77bcf86cd799439011'
@@ -577,5 +577,10 @@ export class PostController {
     @Delete('member/:postId/:userId')
     async deleteMember(@CurrentUser() id: string, @Param('postId') postId:string, @Param('userId')userId:string){
         return this.postService.deleteMember(id, postId, userId);
+    }
+
+    @Get('search/:keyword')
+    async search(@Param('keyword')keyword:string){
+        return this.postService.search(keyword);
     }
 }
