@@ -14,4 +14,5 @@ export interface UserRepository {
     updateToPushToArray(id: string, pushData : MongoPushOperation<UserArrayFields>): Promise<User | null>;
     create(userData: SignUpDto): Promise<User>;
     delete(id: string);
+    isBookmark(userId: string, postId: string) : Promise<boolean>;
 }

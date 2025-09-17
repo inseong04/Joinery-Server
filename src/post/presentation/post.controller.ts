@@ -579,8 +579,9 @@ export class PostController {
         return this.postService.deleteMember(id, postId, userId);
     }
 
+    @UseGuards(OptionalJwtAuthGuard)
     @Get('search/:keyword')
-    async search(@Param('keyword')keyword:string){
-        return this.postService.search(keyword);
+    async search(@Param('keyword')keyword: string, @CurrentUser() userId: string){
+        return this.postService.search(keyword, userId);
     }
 }

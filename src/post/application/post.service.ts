@@ -29,6 +29,22 @@ export class PostService {
         private readonly notifications: NotificationsService,
     ){}
 
+    // 토큰 유효 판독 (userId가 유효한 문자열인 경우)
+    isValidToken(userId: string){
+        if(userId && typeof userId === 'string' && userId.trim() !== '')
+            return true;
+        else
+            return false;
+    }
+
+    // 게시글 이용자 판독
+    isAuthor(userId:string, authorId:string){
+        if (userId == authorId)
+            return true;
+        else
+            return false;
+    }
+
     async getRegionPost(regionId:number, findRegionDto: FindRegionDto){
     let result: PreviewPostDto[] = [];
     //시작날짜 끝나는날짜 미입력시
@@ -109,8 +125,7 @@ export class PostService {
             };
         });
 
-        // 토큰 있을시 (userId가 유효한 문자열인 경우)
-        if (userId && typeof userId === 'string' && userId.trim() !== '') {
+        if (this.isValidToken(userId)) {
             const user = await this.userRepository.findById(userId);
             if (!user) throw new NotFoundException();
             // 아무도 하트X-> 아무데도 등록X heartType 0
@@ -126,8 +141,8 @@ export class PostService {
             }
             
             const {authorId, memberId, schedule, ...rest} = post;
-            // 조회 이용자가 게시글 작성자인지 판별
-            if (user._id.toString() == post.authorId) {
+            
+            if (this.isAuthor(user._id.toString(), post.authorId)){
                 // 게시글 작성자일시
                 const likedUsers: UsersInformationDto[] = await Promise.all(
                     post.likedUserId.map(async id => {
@@ -398,28 +413,35 @@ export class PostService {
             currentPerson: newCurrentPerson});
     }
 
-    async search(keyword: string){
+    async search(keyword: string, userId: string){
         if (!keyword)
             throw new BadRequestException();
 
         const posts = await this.postRepository.search(keyword);
         
         const postList: SearchPostDto[] = await Promise.all(posts.map(async item => {
-            const authorUser = await this.userRepository.findById(item.authorId);
-            const author : SearchAuthor = {
-                nickname: authorUser?.nickname ?? 'Unknown',
-                profileImageUrl: authorUser?.profileImageUrl ?? process.env.DEFAULT_PROFILE_IMAGE_URL!
-            };
-            
-            return {
-                _id: item._id.toString(),
-                title: item.title,
-                startDate: DateUtils.formatDate(item.startDate),
-                maxPerson: item.maxPerson,
-                currentPerson: item.currentPerson,
-                author: author,
-            }
-        }));
+                const authorUser = await this.userRepository.findById(item.authorId);
+                const author : SearchAuthor = {
+                    nickname: authorUser?.nickname ?? 'Unknown',
+                    profileImageUrl: authorUser?.profileImageUrl ?? process.env.DEFAULT_PROFILE_IMAGE_URL!
+                };
+                let isBookmark: boolean;
+                if (this.isValidToken(userId))
+                    isBookmark = await this.userRepository.isBookmark(userId, item._id);
+                else
+                    isBookmark = false;
+                
+                return {
+                    _id: item._id.toString(),
+                    title: item.title,
+                    startDate: DateUtils.formatDate(item.startDate),
+                    maxPerson: item.maxPerson,
+                    currentPerson: item.currentPerson,
+                    author: author,
+                    isBookmark
+                }
+            })
+        );
 
         return postList;
     }
