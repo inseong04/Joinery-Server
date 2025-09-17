@@ -9,7 +9,7 @@ import { RegionPostDto } from './dto/region.post.dto';
 import { FindRegionDto } from './dto/find.region.dto';
 import { isValidObjectId } from 'mongoose';
 import { CurrentUser } from '../../auth/presentation/decorators/current-user.decorator';
-import { CommonResponses, PostDetailResponse, PopularRegionsResponse, PostListResponse, LikeResponse, DeletePostResponse, MemberResponses } from '../../utils/swagger/responses';
+import { CommonResponses, PostDetailResponse, PopularRegionsResponse, PostListResponse, LikeResponse, DeletePostResponse, MemberResponses, SearchPostListResponse } from '../../utils/swagger/responses';
 import { PreviewPostDto } from './dto/preview.post.model';
 import { OptionalJwtAuthGuard } from 'src/auth/presentation/guard/optional-auth.guard';
 
@@ -579,8 +579,28 @@ export class PostController {
         return this.postService.deleteMember(id, postId, userId);
     }
 
+    @UseGuards(OptionalJwtAuthGuard)
+    @ApiOperation({
+        summary:'게시글 검색',
+        description:'키워드로 게시글을 검색합니다. token을 실지않았을 경우 bookmark는 false로 반환됩니다.'
+    })
+    @ApiParam({
+        name:'keyword',
+        type:'string',
+        description:'검색 키워드',
+        example:'서울 여행'
+    })
+    @ApiOkResponse({
+        description:'검색 결과 목록',
+        schema: SearchPostListResponse
+    })
+    @ApiResponse({
+        status: 400,
+        description: '잘못된 요청 데이터',
+        schema: CommonResponses.validationError
+    })
     @Get('search/:keyword')
-    async search(@Param('keyword')keyword:string){
-        return this.postService.search(keyword);
+    async search(@Param('keyword')keyword: string, @CurrentUser() userId: string){
+        return this.postService.search(keyword, userId);
     }
 }

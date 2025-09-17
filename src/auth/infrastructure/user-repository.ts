@@ -11,6 +11,14 @@ export class MongoUserRepository implements UserRepository {
     constructor(
         @InjectModel('User') private readonly userModel:Model<User>,   
     ){}
+    async isBookmark(userId: string, postId: string) : Promise<boolean> {
+        const user = await this.userModel.findById(userId).lean();
+        const bookmarkPostId = user?.bookmarkPostId;
+        if (bookmarkPostId?.includes(postId.toString()))
+            return true;
+        else
+            return false;
+    }
     async updateToPullFromArray(id: string, pullData: MongoPullOperation<UserArrayFields>): Promise<User | null> {
         return await this.userModel.findByIdAndUpdate(id, pullData);
     }
