@@ -539,6 +539,24 @@ export const BookmarkResponses = {
   }
 };
 
+// 게시글 검색 응답 스키마
+export const SearchPostListResponse = {
+  type: 'array',
+  items: {
+    type: 'object',
+    properties: {
+      _id: { type: 'string', example: '507f1f77bcf86cd799439011' },
+      authorId: { type: 'string', example: '507f1f77bcf86cd799439012' },
+      title: { type: 'string', example: '서울 주말 동행 구해요' },
+      startDate: { type: 'string', example: '2025-01-21' },
+      maxPerson: { type: 'number', example: 4 },
+      currentPerson: { type: 'number', example: 2 },
+      nickname: { type: 'string', example: '여행러버' },
+      profileImageUrl: { type: 'string', example: 'uploads/1754546984873-profile-image.png' }
+    }
+  }
+};
+
 // 알림 응답 스키마
 export const NotificationResponses = {
   // 단일 알림 스키마
