@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException, Inject } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, Inject, ConflictException } from '@nestjs/common';
 import { PostCreateDto } from '../presentation/dto/post.create.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -20,6 +20,7 @@ import { PostInformation } from './interfaces/post-information.interface';
 import { UserRepository } from 'src/auth/application/interfaces/user-repository.interface';
 import { SearchPostDto } from '../presentation/dto/search.post.dto';
 import { SearchAuthor } from './interfaces/author-search.model';
+import { NotificationRepository } from 'src/notifications/application/interfaces/notification-repository.interface';
 
 @Injectable()
 export class PostService {
@@ -204,7 +205,6 @@ export class PostService {
     }
 
     async updateLike(id: string, userId: string){
-        console.log(id);
         if (id === undefined)
             throw new NotFoundException();
         
@@ -212,8 +212,11 @@ export class PostService {
         if (!post || !post.authorId)
             throw new NotFoundException();
 
-        if(post?.authorId == userId)
+        if (post?.authorId == userId)
             throw new BadRequestException();
+
+        if (post.memberId.includes(id))
+            throw new ConflictException();
 
         await this.postRepository.updateToAddToArray(id, {$addToSet: {likedUserId: userId}});
         await this.userRepository.updateToAddToArray(userId,  {$addToSet: {likePostId: id}});
@@ -430,7 +433,7 @@ export class PostService {
                     isBookmark = await this.userRepository.isBookmark(userId, item._id);
                 else
                     isBookmark = false;
-                
+
                 return {
                     _id: item._id.toString(),
                     title: item.title,
@@ -445,4 +448,5 @@ export class PostService {
 
         return postList;
     }
+
 }

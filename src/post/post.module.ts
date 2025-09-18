@@ -7,7 +7,6 @@ import { User, UserSchema } from 'src/auth/infrastructure/schema/user.schema';
 import { NotificationsModule } from 'src/notifications/notifications.module';
 import { MongoPostRepository } from './infrastructure/post-repository';
 import { MongoUserRepository } from 'src/auth/infrastructure/user-repository';
-
 @Module({
   imports:[  
     MongooseModule.forFeature([{
@@ -25,7 +24,7 @@ import { MongoUserRepository } from 'src/auth/infrastructure/user-repository';
     {
       provide: 'UserRepository',
       useClass: MongoUserRepository
-    }
+    },
   ]
 })
 export class PostModule {}

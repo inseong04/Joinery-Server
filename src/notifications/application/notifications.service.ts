@@ -131,4 +131,8 @@ export class NotificationsService {
         await this.notificationRepository.isReadCheck(id);
     }
 
+    async isAllReadCheck(id: string){
+        await this.notificationRepository.isAllReadCheck(id);
+    }
+
 }
