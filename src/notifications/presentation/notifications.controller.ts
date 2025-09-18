@@ -82,4 +82,10 @@ export class NotificationsController {
     async updateIsRead(@CurrentUser() userId: string, @Body('id') id: string){
         return this.notificationsService.isReadCheck(id, userId);
     }
+
+    @UseGuards(JwtAuthGuard)
+    @Patch('/read/all')
+    async updateIsAllRead(@CurrentUser() userId: string){
+        return this.notificationsService.isAllReadCheck(userId);
+    }
 }

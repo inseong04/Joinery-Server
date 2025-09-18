@@ -20,6 +20,7 @@ import { PostInformation } from './interfaces/post-information.interface';
 import { UserRepository } from 'src/auth/application/interfaces/user-repository.interface';
 import { SearchPostDto } from '../presentation/dto/search.post.dto';
 import { SearchAuthor } from './interfaces/author-search.model';
+import { NotificationRepository } from 'src/notifications/application/interfaces/notification-repository.interface';
 
 @Injectable()
 export class PostService {
@@ -447,4 +448,5 @@ export class PostService {
 
         return postList;
     }
+
 }

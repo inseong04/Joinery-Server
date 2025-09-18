@@ -10,6 +10,16 @@ export class MongoNotificationRepository implements NotificationRepository{
     constructor(
         @InjectModel('Notification') private notificationModel:Model<Notification>,
     ){}
+    async isAllReadCheck(id: string) {
+        const notifications = await this.notificationModel.find({userId: id}, {isRead: false}).lean();
+
+        notifications.forEach(async (item) => {
+            await this.notificationModel.updateOne(
+                { _id: item._id},
+                { $set: { isRead: true}}
+            );
+        });
+    }
 
 
     async create(notificationData: NotificationDto) {
