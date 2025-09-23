@@ -215,7 +215,7 @@ export class PostService {
         if (post?.authorId == userId)
             throw new BadRequestException();
 
-        if (post.memberId.includes(id))
+        if (post.memberId.includes(id) || post.likedUserId.includes(id))
             throw new ConflictException();
 
         await this.postRepository.updateToAddToArray(id, {$addToSet: {likedUserId: userId}});
