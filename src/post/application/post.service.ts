@@ -140,6 +140,10 @@ export class PostService {
                     heartType = HeartType.UserOnly;
                 }
             }
+            else if (post.memberId.includes(user._id)){
+                heartType = HeartType.Both;
+            }
+            
             
             const {authorId, memberId, schedule, ...rest} = post;
             
